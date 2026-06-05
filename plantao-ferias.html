@@ -130,8 +130,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .plantao-stat-count{font-weight:600;color:var(--text);font-family:'DM Mono',monospace;}
 .plantao-stat-total{margin-left:auto;font-size:12px;color:var(--text3);}
 .plantao-stat-total strong{color:var(--text);font-family:'DM Mono',monospace;}
-/* sabado tecnico tag */
-.serv-normal-chip{font-size:10px;padding:1px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;display:block;background:#e8f1fd;color:#0c447c;border:1px dashed #7ab0ea;}
+/* escala chips */
+.plantao-chip{font-size:10.5px;padding:3px 7px;border-radius:5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;display:block;background:#fee2e2;color:#991b1b;border-left:3px solid #ef4444;}
+.plantao-chip-solid{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;background:#fee2e2;color:#991b1b;}
+.serv-normal-chip{font-size:10.5px;padding:3px 7px;border-radius:5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;display:block;background:#dbeafe;color:#1d4ed8;border-left:3px solid #3b82f6;}
 
 /* count badge on stat */
 .plantao-stat-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:10px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;}
@@ -147,6 +149,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .cal-day.other-month{background:#faf9f7;}
 .cal-day.today{background:#f0f4fe;}
 .cal-day.weekend-day{background:#fdf8f6;}
+.cal-day.sunday-day{background:#fff5f5;}
 .cal-day.holiday-day{background:#fffbf0;}
 .day-num{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px;font-family:'DM Mono',monospace;}
 .cal-day.today .day-num{color:var(--accent);font-weight:700;}
@@ -839,7 +842,7 @@ function renderCalendarioEscala(){
       if(!emp) return '';
       if(ev.type==='serv_normal')
         return `<span class="serv-normal-chip">📋 ${ev.emp}</span>`;
-      return `<span class="event-chip" style="background:${emp.bg};color:${emp.text};">⚕ ${ev.emp}</span>`;
+      return `<span class="plantao-chip">⚕ ${ev.emp}</span>`;
     },
     dateS => {
       const d=new Date(dateS+'T12:00:00');
@@ -1072,7 +1075,7 @@ function renderPlantao(){
     const dayPl=calEvents.filter(e=>e.type==='plantao'&&inRange(dateS,e.start,e.end));
     const chips=dayPl.map(e=>{
       const emp=getEmp(e.emp);
-      return`<span class="pl-chip" style="background:${emp?.bg};color:${emp?.text};" ${isAdmin?`onclick="openEditCalModal('${e.id}',event)"`:''}>${e.emp}</span>`;
+      return`<span class="pl-chip plantao-chip-solid" ${isAdmin?`onclick="openEditCalModal('${e.id}',event)"`:''}>${e.emp}</span>`;
     }).join('');
 
     const fmtD=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',weekday:'short'});
