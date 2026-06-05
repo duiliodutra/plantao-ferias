@@ -122,7 +122,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .plantao-stat-total{margin-left:auto;font-size:12px;color:var(--text3);}
 .plantao-stat-total strong{color:var(--text);font-family:'DM Mono',monospace;}
 /* sabado tecnico tag */
-.sab-tec-chip{font-size:10px;padding:1px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;display:block;background:#e8f1fd;color:#0c447c;border:1px dashed #7ab0ea;}
+.serv-normal-chip{font-size:10px;padding:1px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;display:block;background:#e8f1fd;color:#0c447c;border:1px dashed #7ab0ea;}
 /* tabs inside plantao panel */
 .plantao-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
 .plantao-tab{flex:1;padding:10px 0;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text2);font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
@@ -403,7 +403,7 @@ body.readonly .pl-add{display:none!important;}
       </div>
       <div class="plantao-tabs">
         <button class="plantao-tab active" onclick="switchPlantaoTab('plantoes')" id="ptab-plantoes">⚕ Plantões</button>
-        <button class="plantao-tab" onclick="switchPlantaoTab('sabados')" id="ptab-sabados">🔧 Sábados Técnicos</button>
+        <button class="plantao-tab" onclick="switchPlantaoTab('serv_normal_tab')" id="ptab-serv_normal_tab">📋 Serviço Normal</button>
       </div>
       <div class="plantao-stats" id="plantao-stats"></div>
       <div class="panel-body" id="panel-plantao"></div>
@@ -448,7 +448,7 @@ body.readonly .pl-add{display:none!important;}
     <div class="modal-title" id="cal-modal-title">Novo evento</div>
     <div class="field-wrap"><label class="field-label">FUNCIONÁRIO</label><select id="cm-emp"></select></div>
     <div class="field-wrap"><label class="field-label">TIPO</label>
-      <select id="cm-type"><option value="ferias">🏖 Férias</option><option value="plantao">⚕ Plantão</option><option value="sabado_tec">🔧 Sábado Técnico</option></select>
+      <select id="cm-type"><option value="ferias">🏖 Férias</option><option value="plantao">⚕ Plantão</option><option value="serv_normal">📋 Serviço Normal</option></select>
     </div>
     <div class="field-wrap" id="cm-period-wrap"><label class="field-label">PERÍODO AQUISITIVO</label><select id="cm-period"></select></div>
     <div class="field-wrap"><label class="field-label">DATAS</label>
@@ -566,7 +566,7 @@ const periodLabel = p => `${p.yearStart}/${p.yearStart+1}`;
 const parcelaDays = p => p.parcelas.reduce((acc,parc)=>acc+Math.round((new Date(parc.end+'T12:00:00')-new Date(parc.start+'T12:00:00'))/86400000)+1,0);
 const allFeriasEvents = () => periods.flatMap(per=>per.parcelas.map(parc=>({emp:per.emp,type:'ferias',start:parc.start,end:parc.end,periodId:per.id,parcelaId:parc.id})));
 const allEvents = () => [...calEvents,...allFeriasEvents()];
-const isSabTec = ev => ev.type==='sabado_tec';
+const isSabTec = ev => ev.type==='serv_normal';
 const isPlantao = ev => ev.type==='plantao';
 const eventsForDate = d => allEvents().filter(ev=>inRange(d,ev.start,ev.end));
 const genId = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -640,9 +640,9 @@ window.openDrawer=empName=>{
   const totalDays=empPeriods.reduce((a,p)=>a+p.totalDays,0);
   const usedDays=empPeriods.reduce((a,p)=>a+parcelaDays(p),0);
   const empPlantoes=calEvents.filter(e=>e.emp===empName&&e.type==='plantao').sort((a,b)=>b.start.localeCompare(a.start));
-  const empSabTec=calEvents.filter(e=>e.emp===empName&&e.type==='sabado_tec').sort((a,b)=>b.start.localeCompare(a.start));
+  const empSabTec=calEvents.filter(e=>e.emp===empName&&e.type==='serv_normal').sort((a,b)=>b.start.localeCompare(a.start));
 
-  document.getElementById('drawer-sub').textContent=`${empPeriods.length} período${empPeriods.length!==1?'s':''} · ${empPlantoes.length} plantão${empPlantoes.length!==1?'ões':''} · ${empSabTec.length} sáb. técnico${empSabTec.length!==1?'s':''}`;
+  document.getElementById('drawer-sub').textContent=`${empPeriods.length} período${empPeriods.length!==1?'s':''} · ${empPlantoes.length} plantão${empPlantoes.length!==1?'ões':''} · ${empSabTec.length} serv. normal${empSabTec.length!==1?'s':''}`;
 
   let html=`<div class="drawer-stats" style="grid-template-columns:repeat(4,1fr);">
     <div class="drawer-stat"><div class="drawer-stat-val" style="color:${emp.text};">${totalDays}</div><div class="drawer-stat-lbl">Dias direito</div></div>
@@ -699,11 +699,11 @@ window.openDrawer=empName=>{
 
   // Sábados técnicos no drawer
   if(empSabTec.length){
-    html+=`<div class="drawer-section-title">SÁBADOS TÉCNICOS (${empSabTec.length})</div>`;
+    html+=`<div class="drawer-section-title">SERVIÇOS NORMAIS (${empSabTec.length})</div>`;
     empSabTec.forEach(ev=>{
       html+=`<div class="drawer-plantao-row">
         <div class="drawer-plantao-date">${fmtDateLong(ev.start)}</div>
-        <span class="drawer-plantao-type" style="background:#e8f1fd;color:#0c447c;">Sáb. Técnico</span>
+        <span class="drawer-plantao-type" style="background:#e8f1fd;color:#0c447c;">Serv. Normal</span>
       </div>`;
     });
   }
@@ -777,9 +777,9 @@ function renderCalendar(){
     if(holiday) inner+=`<div class="holiday-tag">${holiday}</div>`;
     dayEvs.slice(0,3).forEach(ev=>{
       const emp=getEmp(ev.emp);
-      const label=ev.type==='plantao'?`⚕ ${ev.emp}`:ev.type==='sabado_tec'?`🔧 ${ev.emp}`:ev.emp;
+      const label=ev.type==='plantao'?`⚕ ${ev.emp}`:ev.type==='serv_normal'?`📋 ${ev.emp}`:ev.emp;
       if(emp){
-        if(ev.type==='sabado_tec') inner+=`<span class="sab-tec-chip">${label}</span>`;
+        if(ev.type==='serv_normal') inner+=`<span class="serv-normal-chip">${label}</span>`;
         else inner+=`<span class="event-chip" style="background:${emp.bg};color:${emp.text};">${label}</span>`;
       }
     });
@@ -794,7 +794,7 @@ function renderCalendar(){
 window.handleDayClick=dateS=>{
   if(!isAdmin) return;
   const evs=eventsForDate(dateS);
-  if(evs.length===1&&(evs[0].type==='plantao'||evs[0].type==='sabado_tec')) openEditCalModal(evs[0].id);
+  if(evs.length===1&&(evs[0].type==='plantao'||evs[0].type==='serv_normal')) openEditCalModal(evs[0].id);
   else openCalModal(dateS);
 };
 
@@ -899,18 +899,18 @@ let currentPlantaoTab='plantoes';
 window.switchPlantaoTab=tab=>{
   currentPlantaoTab=tab;
   document.getElementById('ptab-plantoes').classList.toggle('active',tab==='plantoes');
-  document.getElementById('ptab-sabados').classList.toggle('active',tab==='sabados');
+  document.getElementById('ptab-serv_normal_tab').classList.toggle('active',tab==='serv_normal_tab');
   renderPlantao();
 };
 
 function renderPlantao(){
   const y=currentDate.getFullYear(),m=currentDate.getMonth();
   const ms=ds(y,m+1,1),me=ds(y,m+1,new Date(y,m+1,0).getDate());
-  const showSabTec=currentPlantaoTab==='sabados';
+  const showSabTec=currentPlantaoTab==='serv_normal_tab';
 
   // ── Stats: apenas plantões reais ──
   const monthPlantoes=calEvents.filter(e=>e.type==='plantao'&&e.start>=ms&&e.end<=me);
-  const monthSabTec=calEvents.filter(e=>e.type==='sabado_tec'&&e.start>=ms&&e.end<=me);
+  const monthSabTec=calEvents.filter(e=>e.type==='serv_normal'&&e.start>=ms&&e.end<=me);
 
   const countByEmp={};
   monthPlantoes.forEach(e=>{countByEmp[e.emp]=(countByEmp[e.emp]||0)+1;});
@@ -947,14 +947,14 @@ function renderPlantao(){
     }
     statsHtml+=`<div class="plantao-stat-total">
       ${showSabTec
-        ? `Sáb. técnicos: <strong>${monthSabTec.length}</strong>`
+        ? `Serv. normals: <strong>${monthSabTec.length}</strong>`
         : `Plantões: <strong>${monthPlantoes.length}</strong>`}
     </div>`;
   }
   document.getElementById('plantao-stats').innerHTML=statsHtml;
 
   // ── List ──
-  const eventType=showSabTec?'sabado_tec':'plantao';
+  const eventType=showSabTec?'serv_normal':'plantao';
   const dim=new Date(y,m+1,0).getDate();
   let html='';
   for(let d=1;d<=dim;d++){
@@ -962,13 +962,13 @@ function renderPlantao(){
     const dow=date.getDay();
     const dateS=ds(y,m+1,d);
     const holiday=HOLIDAYS[dateS];
-    // Plantões: sab+dom+feriado. Sábado Técnico: apenas sábados
-    if(showSabTec){if(dow!==6) continue;}
+    // Plantões: sab+dom+feriado. Serviço Normal: apenas sábados
+    if(showSabTec){if(dow===0) continue;} // Serviço Normal: seg-sáb, exceto domingo
     else{if(dow!==0&&dow!==6&&!holiday) continue;}
 
     let type='',typeBg='',typeColor='';
     if(holiday&&!showSabTec){type=holiday;typeBg='#fff8e0';typeColor='#8a6c10';}
-    else if(dow===6){type=showSabTec?'Sábado Técnico':'Sábado';typeBg=showSabTec?'#e8f1fd':'#fdf0ec';typeColor=showSabTec?'#0c447c':'#7a3520';}
+    else if(dow===6){type=showSabTec?'Serviço Normal':'Sábado';typeBg=showSabTec?'#e8f1fd':'#fdf0ec';typeColor=showSabTec?'#0c447c':'#7a3520';}
     else{type='Domingo';typeBg='#fcedf4';typeColor='#722440';}
 
     const dayEvs=calEvents.filter(e=>e.type===eventType&&inRange(dateS,e.start,e.end));
@@ -986,7 +986,7 @@ function renderPlantao(){
       ${isAdmin?`<button class="pl-add" onclick="openCalModal('${dateS}','${eventType}',event)"><i class="ti ti-plus"></i> ${showSabTec?'Escalar':'Escalar'}</button>`:''}
     </div>`;
   }
-  document.getElementById('panel-plantao').innerHTML=html||`<div class="empty-msg">${showSabTec?'Nenhum sábado técnico neste mês.':'Sem fins de semana neste mês.'}</div>`;
+  document.getElementById('panel-plantao').innerHTML=html||`<div class="empty-msg">${showSabTec?'Nenhum serviço normal neste mês.':'Sem fins de semana neste mês.'}</div>`;
 }
 
 // ── Modal: Cal ──
