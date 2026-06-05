@@ -9,232 +9,268 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:#f5f3ef; --surface:#fff; --surface2:#f0ede8; --border:#e0dbd3;
-  --text:#1a1916; --text2:#6b6860; --text3:#a8a49e;
-  --accent:#2d5be3; --accent-bg:#edf0fd; --radius:10px; --radius-lg:14px;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f5f3ef;--surface:#fff;--surface2:#f0ede8;--border:#e0dbd3;
+  --text:#1a1916;--text2:#6b6860;--text3:#a8a49e;
+  --accent:#2d5be3;--accent-bg:#edf0fd;--radius:10px;--radius-lg:14px;
 }
-body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; overflow:hidden; }
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
-/* ── Auth Screen ── */
-#auth-screen {
-  position:fixed; inset:0; background:var(--bg); z-index:200;
-  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0;
+/* Auth */
+#auth-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;align-items:center;justify-content:center;}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 44px;width:360px;text-align:center;box-shadow:0 4px 32px rgba(0,0,0,0.08);}
+.auth-logo{font-size:22px;font-weight:700;letter-spacing:-0.03em;margin-bottom:4px;}
+.auth-sub{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:32px;}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+.auth-divider span{font-size:11px;color:var(--text3);white-space:nowrap;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 20px;border:1px solid var(--border);border-radius:10px;background:var(--surface);cursor:pointer;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;color:var(--text);transition:background 0.15s;}
+.btn-google:hover{background:var(--surface2);}
+.btn-guest{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px 20px;border:none;border-radius:10px;background:none;cursor:pointer;font-size:13px;color:var(--text2);font-family:'DM Sans',sans-serif;transition:background 0.15s;}
+.btn-guest:hover{background:var(--surface2);}
+.auth-notice{font-size:11px;color:var(--text3);margin-top:16px;line-height:1.6;}
+
+/* Sidebar */
+/* ── Top bar (mobile) ── */
+.top-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+.top-bar-logo{font-size:15px;font-weight:700;letter-spacing:-0.02em;flex:1;}
+.top-bar-logo small{font-size:10px;font-weight:400;color:var(--text3);display:block;font-family:'DM Mono',monospace;line-height:1.2;}
+.btn-menu{border:none;background:none;cursor:pointer;color:var(--text2);font-size:22px;display:flex;align-items:center;padding:4px;border-radius:6px;}
+.btn-signout{border:none;background:none;cursor:pointer;color:var(--text3);font-size:18px;display:flex;align-items:center;padding:4px;border-radius:6px;transition:background 0.15s;}
+.btn-signout:hover{background:var(--surface2);color:var(--text2);}
+.user-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;}
+.user-avatar-placeholder{width:30px;height:30px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+
+/* ── Bottom nav (mobile) ── */
+.bottom-nav{display:flex;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;}
+.bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 10px;border:none;background:none;cursor:pointer;font-size:10px;color:var(--text3);font-family:'DM Sans',sans-serif;gap:3px;transition:color 0.15s;}
+.bottom-nav-item i{font-size:20px;}
+.bottom-nav-item.active{color:var(--accent);}
+
+/* ── Slide-in menu (funcionários) ── */
+.menu-drawer{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--surface);border-right:1px solid var(--border);z-index:180;transform:translateX(-100%);transition:transform 0.25s ease;display:flex;flex-direction:column;overflow:hidden;}
+.menu-drawer.open{transform:translateX(0);}
+.menu-drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.2);z-index:170;display:none;}
+.menu-drawer-overlay.open{display:block;}
+.menu-drawer-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
+.menu-drawer-title{font-size:14px;font-weight:600;}
+.menu-drawer-close{border:none;background:none;cursor:pointer;font-size:20px;color:var(--text3);}
+.menu-user-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.menu-user-name{font-size:13px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.menu-user-role{font-size:10px;color:var(--text3);}
+.menu-drawer-body{flex:1;overflow-y:auto;padding:10px 12px;}
+.menu-section-label{font-size:10px;font-weight:600;letter-spacing:0.08em;color:var(--text3);padding:0 6px;margin:10px 0 4px;}
+.emp-row{display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:8px;cursor:pointer;transition:background 0.12s;}
+.emp-row:hover{background:var(--surface2);}
+.emp-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.emp-name-s{font-size:13px;color:var(--text);flex:1;}
+.badge-sm{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.menu-drawer-footer{padding:12px;border-top:1px solid var(--border);}
+.add-event-btn{display:flex;align-items:center;gap:7px;width:100%;padding:8px 12px;border:1.5px dashed var(--border);border-radius:8px;background:none;cursor:pointer;font-size:13px;color:var(--text2);font-family:'DM Sans',sans-serif;transition:background 0.15s,border-color 0.15s;}
+.add-event-btn:hover{background:var(--surface2);border-color:var(--text3);}
+
+/* ── Desktop: sidebar ── */
+@media(min-width:768px){
+  body{flex-direction:row;}
+  .top-bar{display:none;}
+  .bottom-nav{display:none;}
+  .menu-drawer{position:relative;transform:none!important;width:230px;z-index:auto;}
+  .menu-drawer-overlay{display:none!important;}
+  .menu-drawer-header{display:none;}
+  .desktop-sidebar-top{display:flex!important;}
+  .desktop-nav{display:block!important;}
 }
-.auth-card {
-  background:var(--surface); border:1px solid var(--border); border-radius:20px;
-  padding:40px 44px; width:360px; text-align:center;
-  box-shadow:0 4px 32px rgba(0,0,0,0.08);
-}
-.auth-logo { font-size:22px; font-weight:700; letter-spacing:-0.03em; margin-bottom:4px; }
-.auth-sub { font-size:12px; color:var(--text3); font-family:'DM Mono',monospace; margin-bottom:32px; }
-.auth-divider { display:flex; align-items:center; gap:12px; margin:20px 0; }
-.auth-divider span { font-size:11px; color:var(--text3); white-space:nowrap; }
-.auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--border); }
-.btn-google {
-  display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
-  padding:11px 20px; border:1px solid var(--border); border-radius:10px;
-  background:var(--surface); cursor:pointer; font-size:14px; font-weight:500;
-  font-family:'DM Sans',sans-serif; color:var(--text); transition:background 0.15s;
-}
-.btn-google:hover { background:var(--surface2); }
-.btn-google svg { flex-shrink:0; }
-.btn-guest {
-  display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
-  padding:10px 20px; border:none; border-radius:10px; background:none;
-  cursor:pointer; font-size:13px; color:var(--text2); font-family:'DM Sans',sans-serif;
-  transition:background 0.15s;
-}
-.btn-guest:hover { background:var(--surface2); }
-.auth-notice { font-size:11px; color:var(--text3); margin-top:16px; line-height:1.6; }
+.desktop-sidebar-top{display:none;flex-direction:column;}
+.sidebar-logo{padding:16px 18px 12px;border-bottom:1px solid var(--border);}
+.logo-text{font-size:16px;font-weight:600;letter-spacing:-0.02em;}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace;}
+.user-bar-desk{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);}
+.user-name-d{font-size:13px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-role-d{font-size:10px;color:var(--text3);}
+.desktop-nav{display:none;padding:14px 12px 8px;}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:0.08em;color:var(--text3);padding:0 6px;margin-bottom:4px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;border:none;background:none;cursor:pointer;width:100%;text-align:left;font-size:13.5px;color:var(--text2);font-family:'DM Sans',sans-serif;transition:background 0.15s,color 0.15s;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:var(--accent-bg);color:var(--accent);font-weight:500;}
+.nav-item i{font-size:16px;}
+.emp-section{padding:14px 12px;border-top:1px solid var(--border);flex:1;overflow-y:auto;}
 
-/* ── User bar (top of sidebar) ── */
-.user-bar {
-  display:flex; align-items:center; gap:10px; padding:14px 16px;
-  border-bottom:1px solid var(--border);
-}
-.user-avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; flex-shrink:0; }
-.user-avatar-placeholder {
-  width:32px; height:32px; border-radius:50%; background:var(--surface2);
-  display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;
-}
-.user-name { font-size:13px; font-weight:500; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.user-role { font-size:10px; color:var(--text3); }
-.btn-signout {
-  border:none; background:none; cursor:pointer; color:var(--text3); font-size:16px;
-  display:flex; align-items:center; padding:4px; border-radius:6px; transition:background 0.15s;
-}
-.btn-signout:hover { background:var(--surface2); color:var(--text2); }
+/* Read-only banner */
+.readonly-banner{display:none;align-items:center;gap:8px;padding:8px 20px;background:#fffbf0;border-bottom:1px solid #f0e4b0;font-size:12px;color:#8a6c10;}
+.readonly-banner.show{display:flex;}
 
-/* ── Read-only banner ── */
-.readonly-banner {
-  display:none; align-items:center; gap:8px; padding:8px 20px;
-  background:#fffbf0; border-bottom:1px solid #f0e4b0;
-  font-size:12px; color:#8a6c10;
-}
-.readonly-banner.show { display:flex; }
-.readonly-banner i { font-size:15px; }
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.toolbar{display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);}
+.toolbar-title{font-size:15px;font-weight:600;flex:1;letter-spacing:-0.01em;}
+.nav-btn{border:1px solid var(--border);background:var(--surface);padding:6px 11px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text);display:flex;align-items:center;gap:5px;transition:background 0.1s;}
+.nav-btn:hover{background:var(--surface2);}
 
-/* ── Sidebar ── */
-.sidebar { width:230px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
-.sidebar-logo { padding:16px 18px 12px; border-bottom:1px solid var(--border); }
-.logo-text { font-size:16px; font-weight:600; letter-spacing:-0.02em; }
-.logo-sub { font-size:11px; color:var(--text3); margin-top:2px; font-family:'DM Mono',monospace; }
-.nav-section { padding:14px 12px 8px; }
-.nav-label { font-size:10px; font-weight:600; letter-spacing:0.08em; color:var(--text3); padding:0 6px; margin-bottom:4px; }
-.nav-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; border:none; background:none; cursor:pointer; width:100%; text-align:left; font-size:13.5px; color:var(--text2); font-family:'DM Sans',sans-serif; transition:background 0.15s,color 0.15s; }
-.nav-item:hover { background:var(--surface2); color:var(--text); }
-.nav-item.active { background:var(--accent-bg); color:var(--accent); font-weight:500; }
-.nav-item i { font-size:16px; }
-.emp-section { padding:14px 12px; border-top:1px solid var(--border); flex:1; }
-.emp-row { display:flex; align-items:center; gap:8px; padding:5px 4px; }
-.emp-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
-.emp-name-s { font-size:13px; color:var(--text); flex:1; }
-.badge-sm { font-size:10px; padding:2px 7px; border-radius:20px; font-weight:500; }
-.sidebar-footer { padding:12px; border-top:1px solid var(--border); }
-.add-event-btn { display:flex; align-items:center; gap:7px; width:100%; padding:8px 12px; border:1.5px dashed var(--border); border-radius:8px; background:none; cursor:pointer; font-size:13px; color:var(--text2); font-family:'DM Sans',sans-serif; transition:background 0.15s,border-color 0.15s; }
-.add-event-btn:hover { background:var(--surface2); border-color:var(--text3); }
+/* Stats */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;}
+.stat-val{font-size:22px;font-weight:600;letter-spacing:-0.03em;}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:1px;}
 
-/* ── Main ── */
-.main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
-.toolbar { display:flex; align-items:center; gap:10px; padding:12px 20px; background:var(--surface); border-bottom:1px solid var(--border); }
-.toolbar-title { font-size:15px; font-weight:600; flex:1; letter-spacing:-0.01em; }
-.nav-btn { border:1px solid var(--border); background:var(--surface); padding:6px 11px; border-radius:7px; cursor:pointer; font-size:13px; color:var(--text); display:flex; align-items:center; gap:5px; transition:background 0.1s; }
-.nav-btn:hover { background:var(--surface2); }
-.view-toggle { display:flex; border:1px solid var(--border); border-radius:7px; overflow:hidden; }
-.vtab { padding:6px 13px; border:none; background:none; cursor:pointer; font-size:12px; color:var(--text2); font-family:'DM Sans',sans-serif; }
-.vtab.active { background:var(--surface2); color:var(--text); font-weight:500; }
+/* Plantão stats bar */
+.plantao-stats{display:flex;align-items:center;gap:16px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.plantao-stat-item{display:flex;align-items:center;gap:7px;font-size:12px;}
+.plantao-stat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.plantao-stat-name{color:var(--text2);}
+.plantao-stat-count{font-weight:600;color:var(--text);font-family:'DM Mono',monospace;}
+.plantao-stat-total{margin-left:auto;font-size:12px;color:var(--text3);}
+.plantao-stat-total strong{color:var(--text);font-family:'DM Mono',monospace;}
 
-/* ── Stats ── */
-.stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:12px 20px; background:var(--bg); border-bottom:1px solid var(--border); }
-.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; }
-.stat-val { font-size:22px; font-weight:600; letter-spacing:-0.03em; }
-.stat-lbl { font-size:11px; color:var(--text3); margin-top:1px; }
+/* Calendar */
+.cal-wrap{flex:1;overflow-y:auto;}
+.weekday-row{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;}
+.wday{text-align:center;font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text3);padding:9px 0;}
+.wday.weekend{color:#c0533a;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);background:var(--border);gap:1px;}
+.cal-day{background:var(--surface);min-height:88px;padding:7px;cursor:pointer;position:relative;transition:background 0.12s;}
+.cal-day:hover{background:#faf8f5;}
+.cal-day.other-month{background:#faf9f7;}
+.cal-day.today{background:#f0f4fe;}
+.cal-day.weekend-day{background:#fdf8f6;}
+.cal-day.holiday-day{background:#fffbf0;}
+.day-num{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px;font-family:'DM Mono',monospace;}
+.cal-day.today .day-num{color:var(--accent);font-weight:700;}
+.cal-day.other-month .day-num{color:var(--text3);}
+.cal-day.weekend-day .day-num{color:#c0533a;}
+.holiday-tag{font-size:9px;color:#8a6c10;font-weight:600;margin-bottom:3px;background:#fff8e0;padding:1px 5px;border-radius:3px;display:inline-block;}
+.event-chip{font-size:10.5px;padding:2px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;display:block;}
+.cal-add{position:absolute;bottom:5px;right:5px;width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:13px;color:var(--text3);}
+.cal-day:hover .cal-add{display:flex;}
 
-/* ── Calendar ── */
-.cal-wrap { flex:1; overflow-y:auto; }
-.weekday-row { display:grid; grid-template-columns:repeat(7,1fr); background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:2; }
-.wday { text-align:center; font-size:11px; font-weight:600; letter-spacing:0.06em; color:var(--text3); padding:9px 0; }
-.wday.weekend { color:#c0533a; }
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); background:var(--border); gap:1px; }
-.cal-day { background:var(--surface); min-height:88px; padding:7px; cursor:pointer; position:relative; transition:background 0.12s; }
-.cal-day:hover { background:#faf8f5; }
-.cal-day.other-month { background:#faf9f7; }
-.cal-day.today { background:#f0f4fe; }
-.cal-day.weekend-day { background:#fdf8f6; }
-.cal-day.holiday-day { background:#fffbf0; }
-.day-num { font-size:12px; font-weight:500; color:var(--text2); margin-bottom:4px; font-family:'DM Mono',monospace; }
-.cal-day.today .day-num { color:var(--accent); font-weight:700; }
-.cal-day.other-month .day-num { color:var(--text3); }
-.cal-day.weekend-day .day-num { color:#c0533a; }
-.holiday-tag { font-size:9px; color:#8a6c10; font-weight:600; margin-bottom:3px; background:#fff8e0; padding:1px 5px; border-radius:3px; display:inline-block; }
-.event-chip { font-size:10.5px; padding:2px 6px; border-radius:4px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:500; display:block; }
-.cal-add { position:absolute; bottom:5px; right:5px; width:20px; height:20px; border-radius:50%; border:1px solid var(--border); background:var(--surface); cursor:pointer; display:none; align-items:center; justify-content:center; font-size:13px; color:var(--text3); }
-.cal-day:hover .cal-add { display:flex; }
+/* Férias Panel */
+.panel-body{flex:1;overflow-y:auto;padding:20px;}
+.period-filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.filter-label{font-size:12px;color:var(--text3);font-weight:500;}
+.period-chip{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12px;cursor:pointer;color:var(--text2);font-family:'DM Sans',sans-serif;transition:background 0.15s,border-color 0.15s;}
+.period-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500;}
+.period-chip:hover:not(.active){background:var(--surface2);}
+.emp-ferias-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:14px;overflow:hidden;}
+.emp-ferias-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;}
+.emp-ferias-header:hover{background:#faf9f7;}
+.emp-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;}
+.emp-hdr-name{font-size:14px;font-weight:600;}
+.emp-hdr-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.emp-hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.days-left-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;font-family:'DM Mono',monospace;}
+.collapse-icon{font-size:16px;color:var(--text3);transition:transform 0.2s;}
+.collapse-icon.open{transform:rotate(180deg);}
+.emp-ferias-body{padding:12px 18px 16px;}
+.period-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.period-row:last-child{border-bottom:none;}
+.period-year-badge{font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.period-content{flex:1;}
+.period-parcelas{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.parcela-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;padding:4px 10px;border-radius:6px;font-weight:500;cursor:pointer;transition:opacity 0.15s;}
+.parcela-chip:hover{opacity:0.8;}
+.parcela-del{font-size:12px;opacity:0.6;line-height:1;}
+.add-parcela-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:4px 10px;border-radius:6px;border:1px dashed var(--border);background:none;cursor:pointer;color:var(--text3);font-family:'DM Sans',sans-serif;transition:background 0.15s;}
+.add-parcela-btn:hover{background:var(--surface2);color:var(--text2);}
+.period-progress{margin-top:6px;}
+.period-prog-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.period-prog-fill{height:100%;border-radius:2px;}
+.period-prog-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace;}
+.add-period-row{padding-top:10px;border-top:1px dashed var(--border);margin-top:4px;}
+.add-period-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 14px;border-radius:7px;border:1px dashed var(--border);background:none;cursor:pointer;color:var(--text2);font-family:'DM Sans',sans-serif;transition:background 0.15s;}
+.add-period-btn:hover{background:var(--surface2);}
 
-/* ── Férias Panel ── */
-.panel-body { flex:1; overflow-y:auto; padding:20px; }
-.period-filter-bar { display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
-.filter-label { font-size:12px; color:var(--text3); font-weight:500; }
-.period-chip { padding:5px 14px; border-radius:20px; border:1px solid var(--border); background:var(--surface); font-size:12px; cursor:pointer; color:var(--text2); font-family:'DM Sans',sans-serif; transition:background 0.15s,border-color 0.15s; }
-.period-chip.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:500; }
-.period-chip:hover:not(.active) { background:var(--surface2); }
-.emp-ferias-block { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:14px; overflow:hidden; }
-.emp-ferias-header { display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.12s; }
-.emp-ferias-header:hover { background:#faf9f7; }
-.emp-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; flex-shrink:0; }
-.emp-hdr-name { font-size:14px; font-weight:600; }
-.emp-hdr-sub { font-size:11px; color:var(--text3); margin-top:1px; }
-.emp-hdr-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
-.days-left-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; font-family:'DM Mono',monospace; }
-.collapse-icon { font-size:16px; color:var(--text3); transition:transform 0.2s; }
-.collapse-icon.open { transform:rotate(180deg); }
-.emp-ferias-body { padding:12px 18px 16px; }
-.period-row { display:flex; align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
-.period-row:last-child { border-bottom:none; }
-.period-year-badge { font-size:11px; padding:3px 9px; border-radius:6px; font-weight:600; font-family:'DM Mono',monospace; white-space:nowrap; flex-shrink:0; margin-top:2px; }
-.period-content { flex:1; }
-.period-parcelas { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
-.parcela-chip { display:inline-flex; align-items:center; gap:5px; font-size:11.5px; padding:4px 10px; border-radius:6px; font-weight:500; cursor:pointer; transition:opacity 0.15s; }
-.parcela-chip:hover { opacity:0.8; }
-.parcela-del { font-size:12px; opacity:0.6; line-height:1; }
-.add-parcela-btn { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:4px 10px; border-radius:6px; border:1px dashed var(--border); background:none; cursor:pointer; color:var(--text3); font-family:'DM Sans',sans-serif; transition:background 0.15s; }
-.add-parcela-btn:hover { background:var(--surface2); color:var(--text2); }
-.period-progress { margin-top:6px; }
-.period-prog-bar { height:4px; background:var(--surface2); border-radius:2px; overflow:hidden; }
-.period-prog-fill { height:100%; border-radius:2px; }
-.period-prog-meta { display:flex; justify-content:space-between; font-size:10px; color:var(--text3); margin-top:3px; font-family:'DM Mono',monospace; }
-.add-period-row { padding-top:10px; border-top:1px dashed var(--border); margin-top:4px; }
-.add-period-btn { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 14px; border-radius:7px; border:1px dashed var(--border); background:none; cursor:pointer; color:var(--text2); font-family:'DM Sans',sans-serif; transition:background 0.15s; }
-.add-period-btn:hover { background:var(--surface2); }
+/* Plantão panel */
+.plantao-row{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);gap:14px;}
+.pl-date{width:110px;font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;flex-shrink:0;}
+.pl-type{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;flex-shrink:0;}
+.pl-chips{display:flex;gap:5px;flex:1;flex-wrap:wrap;}
+.pl-chip{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
+.pl-add{border:1px dashed var(--border);background:none;padding:4px 11px;border-radius:7px;font-size:11px;cursor:pointer;color:var(--text2);font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.pl-add:hover{background:var(--surface2);}
+.empty-msg{font-size:13px;color:var(--text3);padding:30px 0;text-align:center;}
 
-/* ── Plantão ── */
-.plantao-row { display:flex; align-items:center; padding:11px 0; border-bottom:1px solid var(--border); gap:14px; }
-.pl-date { width:110px; font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; flex-shrink:0; }
-.pl-type { font-size:11px; padding:3px 9px; border-radius:20px; font-weight:600; flex-shrink:0; }
-.pl-chips { display:flex; gap:5px; flex:1; flex-wrap:wrap; }
-.pl-chip { font-size:11px; padding:3px 9px; border-radius:20px; font-weight:500; }
-.pl-add { border:1px dashed var(--border); background:none; padding:4px 11px; border-radius:7px; font-size:11px; cursor:pointer; color:var(--text2); font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:4px; flex-shrink:0; }
-.pl-add:hover { background:var(--surface2); }
-.empty-msg { font-size:13px; color:var(--text3); padding:30px 0; text-align:center; }
+/* ── Drawer: perfil do funcionário ── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.2);z-index:150;display:none;}
+.drawer-overlay.open{display:block;}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--surface);border-left:1px solid var(--border);z-index:160;transform:translateX(100%);transition:transform 0.25s ease;display:flex;flex-direction:column;overflow:hidden;}
+.drawer.open{transform:translateX(0);}
+.drawer-header{display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border);}
+.drawer-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0;}
+.drawer-name{font-size:16px;font-weight:600;}
+.drawer-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+.drawer-close{margin-left:auto;border:none;background:none;cursor:pointer;font-size:20px;color:var(--text3);display:flex;align-items:center;padding:4px;border-radius:6px;}
+.drawer-close:hover{background:var(--surface2);}
+.drawer-body{flex:1;overflow-y:auto;padding:16px 20px;}
+.drawer-section-title{font-size:11px;font-weight:600;letter-spacing:0.06em;color:var(--text3);margin-bottom:10px;margin-top:16px;}
+.drawer-section-title:first-child{margin-top:0;}
 
-/* ── Modals ── */
-.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:100; display:none; align-items:center; justify-content:center; }
-.modal-overlay.open { display:flex; }
-.modal-box { background:var(--surface); border-radius:var(--radius-lg); padding:24px; width:340px; box-shadow:0 8px 40px rgba(0,0,0,0.14); animation:pop 0.18s ease; }
-@keyframes pop { from{transform:scale(0.95);opacity:0;} to{transform:scale(1);opacity:1;} }
-.modal-title { font-size:15px; font-weight:600; margin-bottom:18px; letter-spacing:-0.01em; }
-.field-label { font-size:11px; font-weight:600; letter-spacing:0.04em; color:var(--text3); margin-bottom:5px; display:block; }
-.field-wrap { margin-bottom:14px; }
-select, input[type=date], input[type=number], input[type=text] { width:100%; padding:8px 11px; border:1px solid var(--border); border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--surface); color:var(--text); outline:none; transition:border-color 0.15s; }
-select:focus, input:focus { border-color:var(--accent); }
-.date-row { display:flex; gap:8px; }
-.date-row input { flex:1; }
-.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:6px; }
-.btn-cancel { padding:8px 16px; border:1px solid var(--border); background:none; border-radius:8px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; color:var(--text2); }
-.btn-cancel:hover { background:var(--surface2); }
-.btn-save { padding:8px 18px; border:none; background:var(--accent); color:#fff; border-radius:8px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:500; }
-.btn-save:hover { background:#1e47c9; }
-.btn-delete { padding:8px 14px; border:1px solid #fecaca; background:#fff5f5; color:#c0392b; border-radius:8px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; margin-right:auto; }
-.btn-delete:hover { background:#fde8e8; }
-.modal-info { background:var(--accent-bg); border-radius:8px; padding:10px 12px; font-size:12px; color:#2d4cb0; margin-bottom:14px; line-height:1.5; }
+/* mini stats no drawer */
+.drawer-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
+.drawer-stat{background:var(--surface2);border-radius:8px;padding:10px 12px;}
+.drawer-stat-val{font-size:18px;font-weight:600;letter-spacing:-0.02em;font-family:'DM Mono',monospace;}
+.drawer-stat-lbl{font-size:10px;color:var(--text3);margin-top:1px;}
 
-/* ── Spinner ── */
-.spinner-wrap { position:fixed; inset:0; background:var(--bg); z-index:300; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
-.spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; }
-@keyframes spin { to{transform:rotate(360deg);} }
-.spinner-label { font-size:13px; color:var(--text3); }
+/* período card no drawer */
+.drawer-period-card{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+.drawer-period-label{font-size:11px;font-weight:600;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:5px;display:inline-block;margin-bottom:10px;}
+.drawer-parcela-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);}
+.drawer-parcela-row:last-child{border-bottom:none;}
+.drawer-parcela-dates{font-size:12px;color:var(--text);flex:1;}
+.drawer-parcela-days{font-size:11px;font-family:'DM Mono',monospace;font-weight:600;}
+.drawer-period-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:8px;}
+.drawer-period-fill{height:100%;border-radius:2px;}
+.drawer-period-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace;}
 
-/* ── Toast ── */
-.toast { position:fixed; bottom:24px; right:24px; background:#1a1916; color:#fff; padding:10px 18px; border-radius:8px; font-size:13px; z-index:999; opacity:0; transform:translateY(8px); transition:opacity 0.2s,transform 0.2s; pointer-events:none; }
-.toast.show { opacity:1; transform:translateY(0); }
-::-webkit-scrollbar { width:5px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+/* plantão histórico no drawer */
+.drawer-plantao-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.drawer-plantao-row:last-child{border-bottom:none;}
+.drawer-plantao-date{color:var(--text2);font-family:'DM Mono',monospace;flex:1;}
+.drawer-plantao-type{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;}
 
-/* Disable edit controls in read-only mode */
-body.readonly .add-event-btn,
-body.readonly .cal-add,
-body.readonly .add-parcela-btn,
-body.readonly .add-period-btn,
-body.readonly .add-period-row,
-body.readonly [data-admin-only] { display:none !important; }
-body.readonly .parcela-chip { cursor:default; pointer-events:none; }
-body.readonly .emp-ferias-header { cursor:default; }
-body.readonly .pl-add { display:none !important; }
-body.readonly .nav-btn[data-admin-only] { display:none !important; }
+/* Modals */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.25);z-index:100;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:340px;box-shadow:0 8px 40px rgba(0,0,0,0.14);animation:pop 0.18s ease;}
+@keyframes pop{from{transform:scale(0.95);opacity:0;}to{transform:scale(1);opacity:1;}}
+.modal-title{font-size:15px;font-weight:600;margin-bottom:18px;letter-spacing:-0.01em;}
+.field-label{font-size:11px;font-weight:600;letter-spacing:0.04em;color:var(--text3);margin-bottom:5px;display:block;}
+.field-wrap{margin-bottom:14px;}
+select,input[type=date],input[type=number],input[type=text]{width:100%;padding:8px 11px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--text);outline:none;transition:border-color 0.15s;}
+select:focus,input:focus{border-color:var(--accent);}
+.date-row{display:flex;gap:8px;}
+.date-row input{flex:1;}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px;}
+.btn-cancel{padding:8px 16px;border:1px solid var(--border);background:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--text2);}
+.btn-cancel:hover{background:var(--surface2);}
+.btn-save{padding:8px 18px;border:none;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;}
+.btn-save:hover{background:#1e47c9;}
+.btn-delete{padding:8px 14px;border:1px solid #fecaca;background:#fff5f5;color:#c0392b;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-right:auto;}
+.btn-delete:hover{background:#fde8e8;}
+.modal-info{background:var(--accent-bg);border-radius:8px;padding:10px 12px;font-size:12px;color:#2d4cb0;margin-bottom:14px;line-height:1.5;}
+
+/* Spinner */
+.spinner-wrap{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner-label{font-size:13px;color:var(--text3);}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:#1a1916;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:opacity 0.2s,transform 0.2s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+body.readonly .add-event-btn,body.readonly .cal-add,body.readonly .add-parcela-btn,
+body.readonly .add-period-btn,body.readonly .add-period-row,body.readonly [data-admin-only]{display:none!important;}
+body.readonly .parcela-chip{cursor:default;pointer-events:none;}
+body.readonly .pl-add{display:none!important;}
 </style>
 </head>
 <body>
 
-<!-- Spinner (loading state) -->
-<div class="spinner-wrap" id="spinner">
-  <div class="spinner"></div>
-  <div class="spinner-label">Carregando...</div>
-</div>
+<div class="spinner-wrap" id="spinner"><div class="spinner"></div><div class="spinner-label">Carregando...</div></div>
 
-<!-- Auth Screen -->
 <div id="auth-screen" style="display:none;">
   <div class="auth-card">
     <div class="auth-logo">Plantão & Férias</div>
@@ -244,52 +280,80 @@ body.readonly .nav-btn[data-admin-only] { display:none !important; }
       Entrar com Google
     </button>
     <div class="auth-divider"><span>ou</span></div>
-    <button class="btn-guest" onclick="continueAsGuest()">
-      <i class="ti ti-eye"></i> Visualizar sem login
-    </button>
+    <button class="btn-guest" onclick="continueAsGuest()"><i class="ti ti-eye"></i> Visualizar sem login</button>
     <div class="auth-notice">Somente contas autorizadas podem editar dados. Visitantes têm acesso somente leitura.</div>
   </div>
 </div>
 
-<!-- App (hidden until auth resolved) -->
-<div id="app-wrap" style="display:none; flex:1; overflow:hidden;">
+<div id="app-wrap" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
 
-  <nav class="sidebar">
-    <div class="user-bar" id="user-bar">
-      <div class="user-avatar-placeholder" id="user-avatar-placeholder"><i class="ti ti-user" style="font-size:14px;color:var(--text3);"></i></div>
-      <div style="flex:1;min-width:0;">
-        <div class="user-name" id="user-name">Visitante</div>
-        <div class="user-role" id="user-role">somente leitura</div>
+  <!-- Top bar: mobile only -->
+  <div class="top-bar">
+    <button class="btn-menu" onclick="openMenuDrawer()"><i class="ti ti-menu-2"></i></button>
+    <div class="top-bar-logo">Plantão & Férias<small>controle de escala</small></div>
+    <div class="user-avatar-placeholder" id="user-avatar-placeholder-top" onclick="openMenuDrawer()"><i class="ti ti-user" style="font-size:12px;color:var(--text3);"></i></div>
+    <button class="btn-signout" onclick="signOut()" title="Sair"><i class="ti ti-logout"></i></button>
+  </div>
+
+  <!-- Menu drawer overlay -->
+  <div class="menu-drawer-overlay" id="menu-drawer-overlay" onclick="closeMenuDrawer()"></div>
+
+  <div style="flex:1;display:flex;overflow:hidden;min-width:0;">
+
+    <!-- Sidebar / Menu drawer -->
+    <div class="menu-drawer" id="menu-drawer">
+      <!-- Desktop top section -->
+      <div class="desktop-sidebar-top">
+        <div class="user-bar-desk">
+          <div class="user-avatar-placeholder" id="user-avatar-placeholder"><i class="ti ti-user" style="font-size:13px;color:var(--text3);"></i></div>
+          <div style="flex:1;min-width:0;">
+            <div class="user-name-d" id="user-name">Visitante</div>
+            <div class="user-role-d" id="user-role">somente leitura</div>
+          </div>
+          <button class="btn-signout" onclick="signOut()" title="Sair"><i class="ti ti-logout"></i></button>
+        </div>
+        <div class="sidebar-logo">
+          <div class="logo-text">Plantão & Férias</div>
+          <div class="logo-sub">controle de escala</div>
+        </div>
+        <div class="desktop-nav">
+          <div class="nav-label">Visualização</div>
+          <button class="nav-item active" onclick="switchTab('calendario')" id="nav-calendario"><i class="ti ti-calendar"></i> Calendário</button>
+          <button class="nav-item" onclick="switchTab('ferias')" id="nav-ferias"><i class="ti ti-beach"></i> Férias</button>
+          <button class="nav-item" onclick="switchTab('plantao')" id="nav-plantao"><i class="ti ti-clock-hour-4"></i> Plantões</button>
+        </div>
       </div>
-      <button class="btn-signout" onclick="signOut()" title="Sair"><i class="ti ti-logout"></i></button>
+      <!-- Mobile header -->
+      <div class="menu-drawer-header">
+        <span class="menu-drawer-title">Menu</span>
+        <button class="menu-drawer-close" onclick="closeMenuDrawer()"><i class="ti ti-x"></i></button>
+      </div>
+      <!-- Mobile user info -->
+      <div class="menu-user-bar" id="menu-user-bar">
+        <div class="user-avatar-placeholder" id="user-avatar-placeholder"><i class="ti ti-user" style="font-size:13px;color:var(--text3);"></i></div>
+        <div style="flex:1;min-width:0;">
+          <div class="menu-user-name" id="user-name">Visitante</div>
+          <div class="menu-user-role" id="user-role">somente leitura</div>
+        </div>
+      </div>
+      <div class="menu-drawer-body">
+        <div class="menu-section-label">Funcionários <span style="font-size:9px;">(clique p/ ver)</span></div>
+        <div id="emp-list"></div>
+      </div>
+      <div class="menu-drawer-footer">
+        <button class="add-event-btn" onclick="openCalModal(null)"><i class="ti ti-plus"></i> Adicionar evento</button>
+      </div>
+      <div class="emp-section" style="display:none;" id="desktop-emp-section">
+        <div class="nav-label" style="margin-bottom:6px;">Funcionários <span style="font-size:9px;color:var(--text3);">(clique p/ ver)</span></div>
+        <div id="emp-list-desktop"></div>
+      </div>
     </div>
 
-    <div class="sidebar-logo">
-      <div class="logo-text">Plantão & Férias</div>
-      <div class="logo-sub">controle de escala</div>
-    </div>
-    <div class="nav-section">
-      <div class="nav-label">Visualização</div>
-      <button class="nav-item active" onclick="switchTab('calendario')" id="nav-calendario"><i class="ti ti-calendar"></i> Calendário</button>
-      <button class="nav-item" onclick="switchTab('ferias')" id="nav-ferias"><i class="ti ti-beach"></i> Férias</button>
-      <button class="nav-item" onclick="switchTab('plantao')" id="nav-plantao"><i class="ti ti-clock-hour-4"></i> Plantões</button>
-    </div>
-    <div class="emp-section">
-      <div class="nav-label" style="margin-bottom:8px;">Funcionários</div>
-      <div id="emp-list"></div>
-    </div>
-    <div class="sidebar-footer">
-      <button class="add-event-btn" onclick="openCalModal(null)"><i class="ti ti-plus"></i> Adicionar evento</button>
-    </div>
-  </nav>
-
-  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
-    <!-- Read-only banner -->
-    <div class="readonly-banner" id="readonly-banner">
-      <i class="ti ti-eye"></i>
-      Você está em modo de visualização. Faça login com uma conta autorizada para editar.
-      <button onclick="showAuthScreen()" style="margin-left:auto;border:1px solid #d4a800;background:#fffbf0;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;color:#8a6c10;">Entrar</button>
-    </div>
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
+      <div class="readonly-banner" id="readonly-banner">
+        <i class="ti ti-eye"></i> Você está em modo de visualização.
+        <button onclick="showAuthScreen()" style="margin-left:auto;border:1px solid #d4a800;background:#fffbf0;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;color:#8a6c10;">Entrar</button>
+      </div>
 
     <!-- Calendário -->
     <div class="main" id="main-calendario">
@@ -297,10 +361,6 @@ body.readonly .nav-btn[data-admin-only] { display:none !important; }
         <button class="nav-btn" onclick="navigate(-1)"><i class="ti ti-chevron-left"></i></button>
         <span class="toolbar-title" id="cal-month-label"></span>
         <button class="nav-btn" onclick="navigate(1)"><i class="ti ti-chevron-right"></i></button>
-        <div class="view-toggle">
-          <button class="vtab active" id="vtab-mes" onclick="switchView('mes')">Mês</button>
-          <button class="vtab" id="vtab-lista" onclick="switchView('lista')">Lista</button>
-        </div>
       </div>
       <div class="stats-bar" id="stats-bar"></div>
       <div class="cal-wrap">
@@ -333,12 +393,44 @@ body.readonly .nav-btn[data-admin-only] { display:none !important; }
         <button class="nav-btn" onclick="navigate(1)"><i class="ti ti-chevron-right"></i></button>
         <button class="nav-btn" data-admin-only onclick="openCalModal(null,'plantao')"><i class="ti ti-plus"></i> Escalar</button>
       </div>
+      <div class="plantao-stats" id="plantao-stats"></div>
       <div class="panel-body" id="panel-plantao"></div>
     </div>
+    </div>
   </div>
+
+  <!-- Bottom nav: mobile only -->
+  <nav class="bottom-nav">
+    <button class="bottom-nav-item active" onclick="switchTab('calendario')" id="bnav-calendario">
+      <i class="ti ti-calendar"></i><span>Calendário</span>
+    </button>
+    <button class="bottom-nav-item" onclick="switchTab('ferias')" id="bnav-ferias">
+      <i class="ti ti-beach"></i><span>Férias</span>
+    </button>
+    <button class="bottom-nav-item" onclick="switchTab('plantao')" id="bnav-plantao">
+      <i class="ti ti-clock-hour-4"></i><span>Plantões</span>
+    </button>
+    <button class="bottom-nav-item" onclick="openMenuDrawer()" id="bnav-menu">
+      <i class="ti ti-users"></i><span>Equipe</span>
+    </button>
+  </nav>
 </div>
 
-<!-- Modal: Calendário/Plantão -->
+<!-- Drawer: perfil do funcionário -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-avatar" id="drawer-avatar"></div>
+    <div>
+      <div class="drawer-name" id="drawer-name"></div>
+      <div class="drawer-sub" id="drawer-sub"></div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</div>
+
+<!-- Modal: Cal -->
 <div class="modal-overlay" id="cal-modal-overlay" onclick="handleCalOverlay(event)">
   <div class="modal-box">
     <div class="modal-title" id="cal-modal-title">Novo evento</div>
@@ -358,7 +450,7 @@ body.readonly .nav-btn[data-admin-only] { display:none !important; }
   </div>
 </div>
 
-<!-- Modal: Período aquisitivo -->
+<!-- Modal: Período -->
 <div class="modal-overlay" id="period-modal-overlay" onclick="handlePeriodOverlay(event)">
   <div class="modal-box">
     <div class="modal-title">Novo período aquisitivo</div>
@@ -373,7 +465,7 @@ body.readonly .nav-btn[data-admin-only] { display:none !important; }
   </div>
 </div>
 
-<!-- Modal: Parcela de férias -->
+<!-- Modal: Parcela -->
 <div class="modal-overlay" id="parcela-modal-overlay" onclick="handleParcelaOverlay(event)">
   <div class="modal-box">
     <div class="modal-title" id="parcela-modal-title">Adicionar parcela</div>
@@ -391,10 +483,9 @@ body.readonly .nav-btn[data-admin-only] { display:none !important; }
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase SDKs -->
 <script type="module">
 // ════════════════════════════════════════════════════════
-//  ⚙️  CONFIGURAÇÃO — edite apenas esta seção
+//  ⚙️  CONFIGURAÇÃO
 // ════════════════════════════════════════════════════════
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD9h_yalqNFqjB_kVCSLpx1UiB2aOsk_Us",
@@ -404,26 +495,19 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "972609076253",
   appId: "1:972609076253:web:b571c3fd027e0797461af4"
 };
-
-// Lista de e-mails com permissão de EDITAR (admin)
-// Adicione quantos quiser separados por vírgula
-const ADMIN_EMAILS = [
-  "duiliodudu@gmail.com",
-  // "outro@gmail.com",  ← adicione mais e-mails aqui se precisar
-];
+const ADMIN_EMAILS = ["duiliodudu@gmail.com"];
 // ════════════════════════════════════════════════════════
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as fbSignOut }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-import { getFirestore, doc, collection, getDocs, setDoc, deleteDoc, onSnapshot, writeBatch }
+import { getFirestore, doc, collection, getDocs, setDoc, deleteDoc, getDoc }
   from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// ── Constantes de domínio ──
 const EMPLOYEES = [
   { name:'Donizete',  bg:'#fdf0ec', mid:'#e08060', text:'#7a3520' },
   { name:'Vinicius',  bg:'#efedfe', mid:'#8a84d8', text:'#3c3489' },
@@ -439,145 +523,180 @@ const HOLIDAYS = {
 };
 const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-// ── Estado local ──
-let calEvents = [];
-let periods   = [];
-let currentDate = new Date(2026, 5, 1);
-let currentTab  = 'calendario';
-let selectedPeriodYear = 'all';
-let editingCalId   = null;
-let editingPeriodId  = null;
-let editingParcelaId = null;
-let isAdmin = false;
-let currentUser = null;
+// Dados iniciais para seed
+const SEED_CAL = [
+  { id:'seed_pl1', emp:'Jackson',  type:'plantao', start:'2026-06-07', end:'2026-06-07' },
+  { id:'seed_pl2', emp:'Felipe',   type:'plantao', start:'2026-06-14', end:'2026-06-14' },
+  { id:'seed_pl3', emp:'Jackson',  type:'plantao', start:'2026-06-21', end:'2026-06-21' },
+  { id:'seed_pl4', emp:'Deyse',    type:'plantao', start:'2026-06-28', end:'2026-06-28' },
+];
+const SEED_PERIODS = [
+  { id:'seed_per1', emp:'Donizete',  yearStart:2024, totalDays:30, parcelas:[{id:'sp1',start:'2025-01-10',end:'2025-01-24',obs:'1ª parcela'}] },
+  { id:'seed_per2', emp:'Donizete',  yearStart:2025, totalDays:30, parcelas:[{id:'sp2',start:'2026-07-01',end:'2026-07-12',obs:''}] },
+  { id:'seed_per3', emp:'Vinicius',  yearStart:2025, totalDays:30, parcelas:[{id:'sp3',start:'2026-07-13',end:'2026-07-29',obs:''}] },
+  { id:'seed_per4', emp:'Wenderson', yearStart:2025, totalDays:30, parcelas:[{id:'sp4',start:'2026-08-10',end:'2026-08-28',obs:''}] },
+];
 
-// ── Utils ──
-const getEmp   = n => EMPLOYEES.find(e => e.name === n);
-const pad      = n => String(n).padStart(2, '0');
+let calEvents=[], periods=[];
+let currentDate=new Date(2026,5,1);
+let currentTab='calendario', selectedPeriodYear='all';
+let editingCalId=null, editingPeriodId=null, editingParcelaId=null;
+let isAdmin=false, currentUser=null;
+
+const getEmp   = n => EMPLOYEES.find(e=>e.name===n);
+const pad      = n => String(n).padStart(2,'0');
 const ds       = (y,m,d) => `${y}-${pad(m)}-${pad(d)}`;
-const inRange  = (date, s, e) => date >= s && date <= e;
+const inRange  = (d,s,e) => d>=s && d<=e;
 const initials = n => n.substring(0,2).toUpperCase();
 const fmtDate  = s => new Date(s+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+const fmtDateLong = s => new Date(s+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
 const periodLabel = p => `${p.yearStart}/${p.yearStart+1}`;
-const parcelaDays = p => p.parcelas.reduce((acc, parc) => {
-  return acc + Math.round((new Date(parc.end+'T12:00:00') - new Date(parc.start+'T12:00:00'))/86400000)+1;
-}, 0);
-const allFeriasEvents = () => periods.flatMap(per =>
-  per.parcelas.map(parc => ({ emp:per.emp, type:'ferias', start:parc.start, end:parc.end, periodId:per.id, parcelaId:parc.id }))
-);
-const allEvents = () => [...calEvents, ...allFeriasEvents()];
-const eventsForDate = d => allEvents().filter(ev => inRange(d, ev.start, ev.end));
+const parcelaDays = p => p.parcelas.reduce((acc,parc)=>acc+Math.round((new Date(parc.end+'T12:00:00')-new Date(parc.start+'T12:00:00'))/86400000)+1,0);
+const allFeriasEvents = () => periods.flatMap(per=>per.parcelas.map(parc=>({emp:per.emp,type:'ferias',start:parc.start,end:parc.end,periodId:per.id,parcelaId:parc.id})));
+const allEvents = () => [...calEvents,...allFeriasEvents()];
+const eventsForDate = d => allEvents().filter(ev=>inRange(d,ev.start,ev.end));
+const genId = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 
-// ── Firestore helpers ──
-async function loadData() {
-  const [calSnap, perSnap] = await Promise.all([
-    getDocs(collection(db, 'calEvents')),
-    getDocs(collection(db, 'periods')),
-  ]);
-  calEvents = calSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-  periods   = perSnap.docs.map(d => ({ id: d.id, ...d.data(), parcelas: d.data().parcelas || [] }));
+// ── Seed ──
+async function seedIfEmpty(){
+  const snap=await getDocs(collection(db,'calEvents'));
+  if(!snap.empty) return;
+  showToast('Importando dados iniciais...');
+  for(const ev of SEED_CAL) await setDoc(doc(db,'calEvents',ev.id),ev);
+  for(const per of SEED_PERIODS) await setDoc(doc(db,'periods',per.id),per);
+  showToast('Dados iniciais importados ✓');
 }
 
-async function saveCalEventFS(ev) {
-  await setDoc(doc(db, 'calEvents', ev.id), ev);
+// ── Firestore ──
+async function loadData(){
+  const [calSnap,perSnap]=await Promise.all([getDocs(collection(db,'calEvents')),getDocs(collection(db,'periods'))]);
+  calEvents=calSnap.docs.map(d=>({id:d.id,...d.data()}));
+  periods=perSnap.docs.map(d=>({id:d.id,...d.data(),parcelas:d.data().parcelas||[]}));
 }
-async function deleteCalEventFS(id) {
-  await deleteDoc(doc(db, 'calEvents', id));
-}
-async function savePeriodFS(per) {
-  await setDoc(doc(db, 'periods', per.id), per);
-}
-
-function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+async function saveCalEventFS(ev){await setDoc(doc(db,'calEvents',ev.id),ev);}
+async function deleteCalEventFS(id){await deleteDoc(doc(db,'calEvents',id));}
+async function savePeriodFS(per){await setDoc(doc(db,'periods',per.id),per);}
 
 // ── Auth ──
-window.signInWithGoogle = async () => {
-  try {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-  } catch(e) { showToast('Erro ao fazer login: ' + e.message); }
-};
+window.signInWithGoogle=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){showToast('Erro: '+e.message);}};
+window.continueAsGuest=()=>{currentUser=null;isAdmin=false;applyRole();startApp();};
+window.signOut=async()=>{if(currentUser)await fbSignOut(auth);currentUser=null;isAdmin=false;document.getElementById('app-wrap').style.display='none';document.getElementById('auth-screen').style.display='flex';};
+window.showAuthScreen=()=>{document.getElementById('app-wrap').style.display='none';document.getElementById('auth-screen').style.display='flex';};
 
-window.continueAsGuest = () => {
-  currentUser = null;
-  isAdmin = false;
-  applyRole();
-  startApp();
-};
-
-window.signOut = async () => {
-  if (currentUser) await fbSignOut(auth);
-  currentUser = null; isAdmin = false;
-  document.getElementById('app-wrap').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-};
-
-window.showAuthScreen = () => {
-  document.getElementById('app-wrap').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-};
-
-function applyRole() {
-  const body = document.body;
-  const banner = document.getElementById('readonly-banner');
-  if (isAdmin) {
-    body.classList.remove('readonly');
-    banner.classList.remove('show');
-    document.getElementById('user-role').textContent = 'administrador';
-  } else {
-    body.classList.add('readonly');
-    banner.classList.add('show');
-    document.getElementById('user-role').textContent = 'somente leitura';
-  }
-
-  const nameEl = document.getElementById('user-name');
-  const avatarEl = document.getElementById('user-avatar-placeholder');
-  if (currentUser) {
-    nameEl.textContent = currentUser.displayName || currentUser.email;
-    if (currentUser.photoURL) {
-      avatarEl.innerHTML = `<img src="${currentUser.photoURL}" class="user-avatar" referrerpolicy="no-referrer"/>`;
-    }
-  } else {
-    nameEl.textContent = 'Visitante';
-    avatarEl.innerHTML = '<i class="ti ti-user" style="font-size:14px;color:var(--text3);"></i>';
-  }
+function applyRole(){
+  document.body.classList.toggle('readonly',!isAdmin);
+  document.getElementById('readonly-banner').classList.toggle('show',!isAdmin);
+  document.getElementById('user-role').textContent=isAdmin?'administrador':'somente leitura';
+  const nameEls=document.querySelectorAll('#user-name');
+  const avatarEls=document.querySelectorAll('#user-avatar-placeholder,#user-avatar-placeholder-top');
+  nameEls.forEach(el=>{if(currentUser)el.textContent=currentUser.displayName||currentUser.email;else el.textContent='Visitante';});
+  avatarEls.forEach(el=>{
+    if(currentUser&&currentUser.photoURL) el.innerHTML=`<img src="${currentUser.photoURL}" class="user-avatar" referrerpolicy="no-referrer"/>`;
+    else el.innerHTML='<i class="ti ti-user" style="font-size:13px;color:var(--text3);"></i>';
+  });
 }
 
-async function startApp() {
-  document.getElementById('spinner').style.display = 'flex';
-  document.getElementById('auth-screen').style.display = 'none';
+async function startApp(){
+  document.getElementById('spinner').style.display='flex';
+  document.getElementById('auth-screen').style.display='none';
+  if(isAdmin) await seedIfEmpty();
   await loadData();
-  document.getElementById('spinner').style.display = 'none';
-  document.getElementById('app-wrap').style.display = 'flex';
+  document.getElementById('spinner').style.display='none';
+  document.getElementById('app-wrap').style.display='flex';document.getElementById('app-wrap').style.flexDirection='column';
   renderCalendar();
 }
 
-// Auth state listener
-onAuthStateChanged(auth, async user => {
-  document.getElementById('spinner').style.display = 'none';
-  if (user) {
-    currentUser = user;
-    isAdmin = ADMIN_EMAILS.map(e=>e.toLowerCase()).includes(user.email.toLowerCase());
-    applyRole();
-    startApp();
-  } else {
-    // No user logged in — show auth screen
-    document.getElementById('auth-screen').style.display = 'flex';
-  }
+onAuthStateChanged(auth,async user=>{
+  document.getElementById('spinner').style.display='none';
+  if(user){currentUser=user;isAdmin=ADMIN_EMAILS.map(e=>e.toLowerCase()).includes(user.email.toLowerCase());applyRole();startApp();}
+  else{document.getElementById('auth-screen').style.display='flex';}
 });
 
+// ── Drawer: perfil funcionário ──
+window.openDrawer=empName=>{
+  const emp=getEmp(empName);
+  if(!emp) return;
+  document.getElementById('drawer-avatar').style.cssText=`background:${emp.bg};color:${emp.text};`;
+  document.getElementById('drawer-avatar').textContent=initials(empName);
+  document.getElementById('drawer-name').textContent=empName;
+
+  const empPeriods=periods.filter(p=>p.emp===empName);
+  const totalDays=empPeriods.reduce((a,p)=>a+p.totalDays,0);
+  const usedDays=empPeriods.reduce((a,p)=>a+parcelaDays(p),0);
+  const empPlantoes=calEvents.filter(e=>e.emp===empName&&e.type==='plantao').sort((a,b)=>b.start.localeCompare(a.start));
+
+  document.getElementById('drawer-sub').textContent=`${empPeriods.length} período${empPeriods.length!==1?'s':''} · ${empPlantoes.length} plantão${empPlantoes.length!==1?'ões':''}`;
+
+  let html=`<div class="drawer-stats">
+    <div class="drawer-stat"><div class="drawer-stat-val" style="color:${emp.text};">${totalDays}</div><div class="drawer-stat-lbl">Dias de direito</div></div>
+    <div class="drawer-stat"><div class="drawer-stat-val" style="color:#c0533a;">${usedDays}</div><div class="drawer-stat-lbl">Dias usados</div></div>
+    <div class="drawer-stat"><div class="drawer-stat-val" style="color:#2e5c0e;">${totalDays-usedDays}</div><div class="drawer-stat-lbl">Restantes</div></div>
+  </div>`;
+
+  if(empPeriods.length){
+    html+=`<div class="drawer-section-title">PERÍODOS DE FÉRIAS</div>`;
+    empPeriods.sort((a,b)=>b.yearStart-a.yearStart).forEach(per=>{
+      const used=parcelaDays(per);
+      const pct=Math.min(100,Math.round(used/per.totalDays*100));
+      html+=`<div class="drawer-period-card">
+        <span class="drawer-period-label" style="background:${emp.bg};color:${emp.text};">${periodLabel(per)}</span>`;
+      if(per.parcelas.length){
+        per.parcelas.forEach(parc=>{
+          const days=Math.round((new Date(parc.end+'T12:00:00')-new Date(parc.start+'T12:00:00'))/86400000)+1;
+          html+=`<div class="drawer-parcela-row">
+            <div class="drawer-parcela-dates">${fmtDateLong(parc.start)} → ${fmtDateLong(parc.end)}${parc.obs?` <span style="color:var(--text3);">· ${parc.obs}</span>`:''}
+            </div>
+            <div class="drawer-parcela-days" style="color:${emp.text};">${days}d</div>
+          </div>`;
+        });
+      } else {
+        html+=`<div style="font-size:12px;color:var(--text3);padding:6px 0;">Nenhuma parcela agendada</div>`;
+      }
+      html+=`<div class="drawer-period-bar"><div class="drawer-period-fill" style="width:${pct}%;background:${emp.mid};"></div></div>
+        <div class="drawer-period-meta"><span>${used}d usados</span><span>${per.totalDays-used}d restantes de ${per.totalDays}d</span></div>
+      </div>`;
+    });
+  } else {
+    html+=`<div class="drawer-section-title">PERÍODOS DE FÉRIAS</div><div class="empty-msg" style="padding:12px 0;">Nenhum período cadastrado.</div>`;
+  }
+
+  if(empPlantoes.length){
+    html+=`<div class="drawer-section-title">HISTÓRICO DE PLANTÕES (${empPlantoes.length})</div>`;
+    empPlantoes.forEach(ev=>{
+      const date=new Date(ev.start+'T12:00:00');
+      const dow=date.getDay();
+      const holiday=HOLIDAYS[ev.start];
+      let type='',typeBg='',typeColor='';
+      if(holiday){type=holiday;typeBg='#fff8e0';typeColor='#8a6c10';}
+      else if(dow===6){type='Sábado';typeBg='#fdf0ec';typeColor='#7a3520';}
+      else{type='Domingo';typeBg='#fcedf4';typeColor='#722440';}
+      html+=`<div class="drawer-plantao-row">
+        <div class="drawer-plantao-date">${fmtDateLong(ev.start)}</div>
+        <span class="drawer-plantao-type" style="background:${typeBg};color:${typeColor};">${type}</span>
+      </div>`;
+    });
+  } else {
+    html+=`<div class="drawer-section-title">HISTÓRICO DE PLANTÕES</div><div style="font-size:12px;color:var(--text3);padding:6px 0;">Nenhum plantão registrado.</div>`;
+  }
+
+  document.getElementById('drawer-body').innerHTML=html;
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+};
+
+window.closeDrawer=()=>{
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+};
+
 // ── Sidebar ──
-function renderEmpList() {
-  const today = '2026-06-05';
-  document.getElementById('emp-list').innerHTML = EMPLOYEES.map(e => {
-    const onFer = allFeriasEvents().some(ev => ev.emp===e.name && inRange(today,ev.start,ev.end));
-    return `<div class="emp-row">
+function renderEmpList(){
+  const today='2026-06-05';
+  document.getElementById('emp-list').innerHTML=EMPLOYEES.map(e=>{
+    const onFer=allFeriasEvents().some(ev=>ev.emp===e.name&&inRange(today,ev.start,ev.end));
+    return `<div class="emp-row" onclick="openDrawer('${e.name}')">
       <div class="emp-dot" style="background:${e.mid};"></div>
       <span class="emp-name-s">${e.name}</span>
       <span class="badge-sm" style="background:${onFer?'#fdf0ec':'#eef6e2'};color:${onFer?'#7a3520':'#2e5c0e'};">${onFer?'férias':'ativo'}</span>
@@ -586,22 +705,22 @@ function renderEmpList() {
 }
 
 // ── Stats ──
-function renderStats() {
-  const y=currentDate.getFullYear(), m=currentDate.getMonth();
-  const ms=ds(y,m+1,1), me=ds(y,m+1,new Date(y,m+1,0).getDate());
+function renderStats(){
+  const y=currentDate.getFullYear(),m=currentDate.getMonth();
+  const ms=ds(y,m+1,1),me=ds(y,m+1,new Date(y,m+1,0).getDate());
   const ferSet=new Set(allFeriasEvents().filter(e=>e.start<=me&&e.end>=ms).map(e=>e.emp));
   const plCt=calEvents.filter(e=>e.type==='plantao'&&e.start>=ms&&e.end<=me).length;
   document.getElementById('stats-bar').innerHTML=`
     <div class="stat-card"><div class="stat-val">${EMPLOYEES.length}</div><div class="stat-lbl">Funcionários</div></div>
     <div class="stat-card"><div class="stat-val" style="color:#c0533a;">${ferSet.size}</div><div class="stat-lbl">Em férias</div></div>
     <div class="stat-card"><div class="stat-val" style="color:#2d5be3;">${EMPLOYEES.length-ferSet.size}</div><div class="stat-lbl">Disponíveis</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:#2e5c0e;">${plCt}</div><div class="stat-lbl">Plantões</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#2e5c0e;">${plCt}</div><div class="stat-lbl">Plantões no mês</div></div>
   `;
 }
 
 // ── Calendar ──
-function renderCalendar() {
-  const y=currentDate.getFullYear(), m=currentDate.getMonth();
+function renderCalendar(){
+  const y=currentDate.getFullYear(),m=currentDate.getMonth();
   document.getElementById('cal-month-label').textContent=`${MONTHS[m]} ${y}`;
   document.getElementById('plantao-month-label').textContent=`${MONTHS[m]} ${y}`;
   const firstDow=new Date(y,m,1).getDay();
@@ -642,60 +761,58 @@ function renderCalendar() {
   renderStats(); renderEmpList();
 }
 
-window.handleDayClick = dateS => {
+window.handleDayClick=dateS=>{
   if(!isAdmin) return;
   const evs=eventsForDate(dateS);
   if(evs.length===1&&evs[0].type==='plantao') openEditCalModal(evs[0].id);
   else openCalModal(dateS);
 };
 
-window.navigate = dir => {
+window.navigate=dir=>{
   currentDate=new Date(currentDate.getFullYear(),currentDate.getMonth()+dir,1);
   renderCalendar(); renderPlantao();
 };
 
-window.switchTab = tab => {
+window.openMenuDrawer=()=>{
+  document.getElementById('menu-drawer').classList.add('open');
+  document.getElementById('menu-drawer-overlay').classList.add('open');
+};
+window.closeMenuDrawer=()=>{
+  document.getElementById('menu-drawer').classList.remove('open');
+  document.getElementById('menu-drawer-overlay').classList.remove('open');
+};
+window.switchTab=tab=>{
   currentTab=tab;
   ['calendario','ferias','plantao'].forEach(t=>{
     document.getElementById(`main-${t}`).style.display=t===tab?'flex':'none';
-    document.getElementById(`nav-${t}`).classList.toggle('active',t===tab);
+    const navEl=document.getElementById(`nav-${t}`);
+    if(navEl) navEl.classList.toggle('active',t===tab);
+    const bnavEl=document.getElementById(`bnav-${t}`);
+    if(bnavEl) bnavEl.classList.toggle('active',t===tab);
   });
+  closeMenuDrawer();
   if(tab==='ferias') renderFerias();
   if(tab==='plantao') renderPlantao();
 };
 
-window.switchView = v => {
-  document.getElementById('vtab-mes').classList.toggle('active',v==='mes');
-  document.getElementById('vtab-lista').classList.toggle('active',v==='lista');
-};
-
 // ── Férias ──
-function allPeriodLabels() {
-  return [...new Set(periods.map(p=>periodLabel(p)))].sort();
-}
+function allPeriodLabels(){return[...new Set(periods.map(p=>periodLabel(p)))].sort();}
+window.setPeriodFilter=val=>{selectedPeriodYear=val;renderFerias();};
 
-window.setPeriodFilter = val => { selectedPeriodYear=val; renderFerias(); };
-
-function renderPeriodFilter() {
+function renderPeriodFilter(){
   const labels=allPeriodLabels();
-  let html=`<span class="filter-label">Período:</span>`;
-  html+=`<button class="period-chip ${selectedPeriodYear==='all'?'active':''}" onclick="setPeriodFilter('all')">Todos</button>`;
-  labels.forEach(lbl=>{
-    html+=`<button class="period-chip ${selectedPeriodYear===lbl?'active':''}" onclick="setPeriodFilter('${lbl}')">${lbl}</button>`;
-  });
+  let html=`<span class="filter-label">Período:</span><button class="period-chip ${selectedPeriodYear==='all'?'active':''}" onclick="setPeriodFilter('all')">Todos</button>`;
+  labels.forEach(lbl=>html+=`<button class="period-chip ${selectedPeriodYear===lbl?'active':''}" onclick="setPeriodFilter('${lbl}')">${lbl}</button>`);
   document.getElementById('period-filter-bar').innerHTML=html;
 }
 
-function renderFerias() {
+function renderFerias(){
   renderPeriodFilter();
   const el=document.getElementById('panel-ferias');
   let html='';
   EMPLOYEES.forEach(emp=>{
     let empPeriods=periods.filter(p=>p.emp===emp.name);
-    if(selectedPeriodYear!=='all'){
-      const [ys]=selectedPeriodYear.split('/');
-      empPeriods=empPeriods.filter(p=>String(p.yearStart)===ys);
-    }
+    if(selectedPeriodYear!=='all'){const[ys]=selectedPeriodYear.split('/');empPeriods=empPeriods.filter(p=>String(p.yearStart)===ys);}
     if(!empPeriods.length) return;
     const totalUsed=empPeriods.reduce((a,p)=>a+parcelaDays(p),0);
     const totalRight=empPeriods.reduce((a,p)=>a+p.totalDays,0);
@@ -704,24 +821,19 @@ function renderFerias() {
     html+=`<div class="emp-ferias-block">
       <div class="emp-ferias-header" onclick="toggleEmpBlock('${blockId}')">
         <div class="emp-avatar" style="background:${emp.bg};color:${emp.text};">${initials(emp.name)}</div>
-        <div>
-          <div class="emp-hdr-name">${emp.name}</div>
-          <div class="emp-hdr-sub">${empPeriods.length} período${empPeriods.length>1?'s':''} · ${totalUsed}/${totalRight} dias usados</div>
-        </div>
+        <div><div class="emp-hdr-name">${emp.name}</div><div class="emp-hdr-sub">${empPeriods.length} período${empPeriods.length>1?'s':''} · ${totalUsed}/${totalRight} dias usados</div></div>
         <div class="emp-hdr-right">
           <span class="days-left-badge" style="background:${remaining>0?'#eef6e2':'#fdf0ec'};color:${remaining>0?'#2e5c0e':'#7a3520'};">${remaining}d restantes</span>
           <i class="ti ti-chevron-down collapse-icon open" id="icon-${emp.name.replace(/\s/g,'_')}"></i>
         </div>
       </div>
       <div class="emp-ferias-body" id="${blockId}">`;
-
     empPeriods.sort((a,b)=>b.yearStart-a.yearStart).forEach(per=>{
       const used=parcelaDays(per);
       const pct=Math.min(100,Math.round(used/per.totalDays*100));
       html+=`<div class="period-row">
         <div class="period-year-badge" style="background:${emp.bg};color:${emp.text};">${periodLabel(per)}</div>
-        <div class="period-content">
-          <div class="period-parcelas">`;
+        <div class="period-content"><div class="period-parcelas">`;
       per.parcelas.forEach(parc=>{
         const days=Math.round((new Date(parc.end+'T12:00:00')-new Date(parc.start+'T12:00:00'))/86400000)+1;
         html+=`<span class="parcela-chip" style="background:${emp.bg};color:${emp.text};" onclick="openParcelaModal('${per.id}','${parc.id}',event)">
@@ -734,17 +846,15 @@ function renderFerias() {
           <div class="period-progress">
             <div class="period-prog-bar"><div class="period-prog-fill" style="width:${pct}%;background:${emp.mid};"></div></div>
             <div class="period-prog-meta"><span>${used} dias usados</span><span>${per.totalDays-used} restantes de ${per.totalDays}d</span></div>
-          </div>
-        </div></div>`;
+          </div></div></div>`;
     });
-
     if(isAdmin) html+=`<div class="add-period-row"><button class="add-period-btn" onclick="openPeriodModalFor('${emp.name}',event)"><i class="ti ti-plus"></i> Adicionar período aquisitivo</button></div>`;
     html+=`</div></div>`;
   });
-  el.innerHTML=html||'<div class="empty-msg"><i class="ti ti-beach" style="font-size:32px;display:block;margin:0 auto 8px;"></i>Nenhum período cadastrado.</div>';
+  el.innerHTML=html||'<div class="empty-msg">Nenhum período cadastrado.</div>';
 }
 
-window.toggleEmpBlock = id => {
+window.toggleEmpBlock=id=>{
   const el=document.getElementById(id);
   const key=id.replace('empblock-','');
   const icon=document.getElementById('icon-'+key);
@@ -754,8 +864,26 @@ window.toggleEmpBlock = id => {
 };
 
 // ── Plantão ──
-function renderPlantao() {
+function renderPlantao(){
   const y=currentDate.getFullYear(),m=currentDate.getMonth();
+  const ms=ds(y,m+1,1),me=ds(y,m+1,new Date(y,m+1,0).getDate());
+  const monthPlantoes=calEvents.filter(e=>e.type==='plantao'&&e.start>=ms&&e.end<=me);
+
+  // Stats por funcionário
+  const countByEmp={};
+  monthPlantoes.forEach(e=>{countByEmp[e.emp]=(countByEmp[e.emp]||0)+1;});
+  let statsHtml='';
+  Object.entries(countByEmp).sort((a,b)=>b[1]-a[1]).forEach(([name,ct])=>{
+    const emp=getEmp(name);
+    statsHtml+=`<div class="plantao-stat-item">
+      <div class="plantao-stat-dot" style="background:${emp?.mid};"></div>
+      <span class="plantao-stat-name">${name}</span>
+      <span class="plantao-stat-count">${ct}</span>
+    </div>`;
+  });
+  statsHtml+=`<div class="plantao-stat-total">Total: <strong>${monthPlantoes.length}</strong> plantão${monthPlantoes.length!==1?'ões':''}</div>`;
+  document.getElementById('plantao-stats').innerHTML=statsHtml||'<span style="font-size:12px;color:var(--text3);">Nenhum plantão neste mês.</span>';
+
   const dim=new Date(y,m+1,0).getDate();
   let html='';
   for(let d=1;d<=dim;d++){
@@ -769,10 +897,7 @@ function renderPlantao() {
     else if(dow===6){type='Sábado';typeBg='#fdf0ec';typeColor='#7a3520';}
     else{type='Domingo';typeBg='#fcedf4';typeColor='#722440';}
     const dayPl=calEvents.filter(e=>e.type==='plantao'&&inRange(dateS,e.start,e.end));
-    const chips=dayPl.map(e=>{
-      const emp=getEmp(e.emp);
-      return `<span class="pl-chip" style="background:${emp?.bg};color:${emp?.text};" ${isAdmin?`onclick="openEditCalModal('${e.id}',event)"`:''}>${e.emp}</span>`;
-    }).join('');
+    const chips=dayPl.map(e=>{const emp=getEmp(e.emp);return`<span class="pl-chip" style="background:${emp?.bg};color:${emp?.text};" ${isAdmin?`onclick="openEditCalModal('${e.id}',event)"`:''}>${e.emp}</span>`;}).join('');
     const fmtD=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',weekday:'short'});
     html+=`<div class="plantao-row">
       <div class="pl-date">${fmtD}</div>
@@ -784,8 +909,8 @@ function renderPlantao() {
   document.getElementById('panel-plantao').innerHTML=html||'<div class="empty-msg">Sem fins de semana neste mês.</div>';
 }
 
-// ── Modal: Cal event ──
-window.openCalModal = (dateS, defaultType, ev) => {
+// ── Modal: Cal ──
+window.openCalModal=(dateS,defaultType,ev)=>{
   if(!isAdmin){showToast('Sem permissão para editar.');return;}
   if(ev) ev.stopPropagation();
   editingCalId=null;
@@ -808,14 +933,12 @@ function updateCalModalPeriods(){
   const sel=document.getElementById('cm-period');
   if(type==='ferias'){
     const ep=periods.filter(p=>p.emp===emp);
-    if(ep.length){
-      sel.innerHTML=ep.map(p=>`<option value="${p.id}">${periodLabel(p)} (${p.totalDays-parcelaDays(p)}d restantes)</option>`).join('');
-      wrap.style.display='block';
-    } else { wrap.style.display='none'; }
-  } else { wrap.style.display='none'; }
+    if(ep.length){sel.innerHTML=ep.map(p=>`<option value="${p.id}">${periodLabel(p)} (${p.totalDays-parcelaDays(p)}d restantes)</option>`).join('');wrap.style.display='block';}
+    else wrap.style.display='none';
+  } else wrap.style.display='none';
 }
 
-window.openEditCalModal = (id, ev) => {
+window.openEditCalModal=(id,ev)=>{
   if(!isAdmin) return;
   if(ev) ev.stopPropagation();
   const event=calEvents.find(e=>e.id===id);
@@ -831,10 +954,10 @@ window.openEditCalModal = (id, ev) => {
   document.getElementById('cal-modal-overlay').classList.add('open');
 };
 
-window.closeCalModal = () => { document.getElementById('cal-modal-overlay').classList.remove('open'); editingCalId=null; };
-window.handleCalOverlay = e => { if(e.target===document.getElementById('cal-modal-overlay')) closeCalModal(); };
+window.closeCalModal=()=>{document.getElementById('cal-modal-overlay').classList.remove('open');editingCalId=null;};
+window.handleCalOverlay=e=>{if(e.target===document.getElementById('cal-modal-overlay'))closeCalModal();};
 
-window.saveCalEvent = async () => {
+window.saveCalEvent=async()=>{
   if(!isAdmin) return;
   const emp=document.getElementById('cm-emp').value;
   const type=document.getElementById('cm-type').value;
@@ -842,43 +965,32 @@ window.saveCalEvent = async () => {
   const end=document.getElementById('cm-end').value;
   if(!start||!end){showToast('Preencha as datas.');return;}
   if(start>end){showToast('Data inicial maior que final.');return;}
-
   if(type==='ferias'){
     const periodId=document.getElementById('cm-period').value;
     const per=periods.find(p=>p.id===periodId);
     if(!per){showToast('Selecione um período aquisitivo.');return;}
-    const newParc={id:genId(),start,end,obs:''};
-    per.parcelas.push(newParc);
+    per.parcelas.push({id:genId(),start,end,obs:''});
     await savePeriodFS(per);
     showToast('Férias adicionadas ✓');
-    closeCalModal(); renderCalendar(); renderFerias(); renderEmpList();
-    return;
+    closeCalModal();renderCalendar();renderFerias();renderEmpList();return;
   }
-
   const evObj={id:editingCalId||genId(),emp,type,start,end};
-  if(editingCalId){
-    const idx=calEvents.findIndex(e=>e.id===editingCalId);
-    if(idx>=0) calEvents[idx]=evObj;
-    showToast('Plantão atualizado ✓');
-  } else {
-    calEvents.push(evObj);
-    showToast('Plantão salvo ✓');
-  }
+  if(editingCalId){const idx=calEvents.findIndex(e=>e.id===editingCalId);if(idx>=0)calEvents[idx]=evObj;showToast('Plantão atualizado ✓');}
+  else{calEvents.push(evObj);showToast('Plantão salvo ✓');}
   await saveCalEventFS(evObj);
-  closeCalModal(); renderCalendar(); renderPlantao(); renderEmpList();
+  closeCalModal();renderCalendar();renderPlantao();renderEmpList();
 };
 
-window.deleteCalEvent = async () => {
+window.deleteCalEvent=async()=>{
   if(!isAdmin||!editingCalId) return;
   await deleteCalEventFS(editingCalId);
   calEvents=calEvents.filter(e=>e.id!==editingCalId);
-  closeCalModal(); renderCalendar(); renderPlantao();
-  showToast('Evento removido.');
+  closeCalModal();renderCalendar();renderPlantao();showToast('Evento removido.');
 };
 
-// ── Modal: Período aquisitivo ──
-window.openPeriodModal = () => openPeriodModalFor(EMPLOYEES[0].name);
-window.openPeriodModalFor = (empName, ev) => {
+// ── Modal: Período ──
+window.openPeriodModal=()=>openPeriodModalFor(EMPLOYEES[0].name);
+window.openPeriodModalFor=(empName,ev)=>{
   if(!isAdmin){showToast('Sem permissão.');return;}
   if(ev) ev.stopPropagation();
   document.getElementById('pm-emp').innerHTML=EMPLOYEES.map(e=>`<option ${e.name===empName?'selected':''}>${e.name}</option>`).join('');
@@ -886,10 +998,10 @@ window.openPeriodModalFor = (empName, ev) => {
   document.getElementById('pm-days').value=30;
   document.getElementById('period-modal-overlay').classList.add('open');
 };
-window.closePeriodModal = () => document.getElementById('period-modal-overlay').classList.remove('open');
-window.handlePeriodOverlay = e => { if(e.target===document.getElementById('period-modal-overlay')) closePeriodModal(); };
+window.closePeriodModal=()=>document.getElementById('period-modal-overlay').classList.remove('open');
+window.handlePeriodOverlay=e=>{if(e.target===document.getElementById('period-modal-overlay'))closePeriodModal();};
 
-window.savePeriod = async () => {
+window.savePeriod=async()=>{
   if(!isAdmin) return;
   const emp=document.getElementById('pm-emp').value;
   const yearStart=parseInt(document.getElementById('pm-year-start').value);
@@ -899,15 +1011,15 @@ window.savePeriod = async () => {
   const newPer={id:genId(),emp,yearStart,totalDays,parcelas:[]};
   periods.push(newPer);
   await savePeriodFS(newPer);
-  closePeriodModal(); renderFerias();
+  closePeriodModal();renderFerias();
   showToast(`Período ${yearStart}/${yearStart+1} criado para ${emp} ✓`);
 };
 
 // ── Modal: Parcela ──
-window.openParcelaModal = (periodId, parcelaId, ev) => {
+window.openParcelaModal=(periodId,parcelaId,ev)=>{
   if(!isAdmin){showToast('Sem permissão.');return;}
   if(ev) ev.stopPropagation();
-  editingPeriodId=periodId; editingParcelaId=parcelaId;
+  editingPeriodId=periodId;editingParcelaId=parcelaId;
   const per=periods.find(p=>p.id===periodId);
   if(parcelaId){
     const parc=per.parcelas.find(p=>p.id===parcelaId);
@@ -918,17 +1030,15 @@ window.openParcelaModal = (periodId, parcelaId, ev) => {
     document.getElementById('parc-btn-delete').style.display='block';
   } else {
     document.getElementById('parcela-modal-title').textContent=`Nova parcela · ${periodLabel(per)} · ${per.emp}`;
-    document.getElementById('parc-start').value='';
-    document.getElementById('parc-end').value='';
-    document.getElementById('parc-obs').value='';
+    document.getElementById('parc-start').value='';document.getElementById('parc-end').value='';document.getElementById('parc-obs').value='';
     document.getElementById('parc-btn-delete').style.display='none';
   }
   document.getElementById('parcela-modal-overlay').classList.add('open');
 };
-window.closeParcelaModal = () => { document.getElementById('parcela-modal-overlay').classList.remove('open'); editingPeriodId=null; editingParcelaId=null; };
-window.handleParcelaOverlay = e => { if(e.target===document.getElementById('parcela-modal-overlay')) closeParcelaModal(); };
+window.closeParcelaModal=()=>{document.getElementById('parcela-modal-overlay').classList.remove('open');editingPeriodId=null;editingParcelaId=null;};
+window.handleParcelaOverlay=e=>{if(e.target===document.getElementById('parcela-modal-overlay'))closeParcelaModal();};
 
-window.saveParcela = async () => {
+window.saveParcela=async()=>{
   if(!isAdmin) return;
   const start=document.getElementById('parc-start').value;
   const end=document.getElementById('parc-end').value;
@@ -943,27 +1053,23 @@ window.saveParcela = async () => {
     showToast('Parcela atualizada ✓');
   } else {
     const days=Math.round((new Date(end+'T12:00:00')-new Date(start+'T12:00:00'))/86400000)+1;
-    if(parcelaDays(per)+days>per.totalDays){
-      if(!confirm(`Atenção: isso vai ultrapassar o limite de ${per.totalDays} dias do período ${periodLabel(per)}. Continuar?`)) return;
-    }
+    if(parcelaDays(per)+days>per.totalDays){if(!confirm(`Atenção: vai ultrapassar o limite de ${per.totalDays} dias. Continuar?`)) return;}
     per.parcelas.push({id:genId(),start,end,obs});
     showToast('Parcela adicionada ✓');
   }
   await savePeriodFS(per);
-  closeParcelaModal(); renderFerias(); renderCalendar(); renderEmpList();
+  closeParcelaModal();renderFerias();renderCalendar();renderEmpList();
 };
 
-window.deleteParcela = async () => {
+window.deleteParcela=async()=>{
   if(!isAdmin) return;
   const per=periods.find(p=>p.id===editingPeriodId);
   if(!per) return;
   per.parcelas=per.parcelas.filter(p=>p.id!==editingParcelaId);
   await savePeriodFS(per);
-  closeParcelaModal(); renderFerias(); renderCalendar(); renderEmpList();
+  closeParcelaModal();renderFerias();renderCalendar();renderEmpList();
   showToast('Parcela removida.');
 };
-
-// Initial spinner while auth resolves — spinner is shown by default in HTML
 </script>
 </body>
 </html>
