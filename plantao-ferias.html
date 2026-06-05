@@ -97,12 +97,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .emp-section{padding:14px 12px;border-top:1px solid var(--border);flex:1;overflow-y:auto;}
 
 /* ── Cal sub-tabs (Férias / Escala) ── */
-.cal-subtabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
-.cal-subtab{flex:1;padding:10px 0;border:none;background:none;cursor:pointer;font-size:13px;
-  color:var(--text2);font-family:'DM Sans',sans-serif;border-bottom:3px solid transparent;
-  transition:color 0.15s,border-color 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;}
-.cal-subtab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
-.cal-subtab i{font-size:16px;}
+.cal-subtabs{display:flex;background:var(--surface);border-bottom:2px solid var(--border);flex-shrink:0;}
+.cal-subtab{flex:1;padding:11px 0;border:none;background:none;cursor:pointer;font-size:14px;
+  color:var(--text2);font-family:'DM Sans',sans-serif;border-bottom:3px solid transparent;margin-bottom:-2px;
+  transition:color 0.15s,border-color 0.15s,background 0.15s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.cal-subtab:hover{background:var(--surface2);}
+.cal-subtab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;background:var(--accent-bg);}
+.cal-subtab i{font-size:17px;}
 
 /* Read-only banner */
 .readonly-banner{display:none;align-items:center;gap:8px;padding:8px 20px;background:#fffbf0;border-bottom:1px solid #f0e4b0;font-size:12px;color:#8a6c10;}
@@ -331,8 +332,7 @@ body.readonly .pl-add{display:none!important;}
         </div>
         <div class="desktop-nav">
           <div class="nav-label">Visualização</div>
-          <button class="nav-item active" onclick="switchTab('calendario');switchCalTab('ferias_cal')" id="nav-calendario"><i class="ti ti-beach"></i> Cal. Férias</button>
-          <button class="nav-item" onclick="switchTab('calendario');switchCalTab('escala')" id="nav-escala"><i class="ti ti-calendar-event"></i> Cal. Escala</button>
+          <button class="nav-item active" onclick="switchTab('calendario')" id="nav-calendario"><i class="ti ti-calendar"></i> Calendário</button>
           <button class="nav-item" onclick="switchTab('ferias')" id="nav-ferias"><i class="ti ti-list"></i> Controle Férias</button>
           <button class="nav-item" onclick="switchTab('plantao')" id="nav-plantao"><i class="ti ti-clock-hour-4"></i> Plantões</button>
         </div>
@@ -934,11 +934,6 @@ window.switchCalTab = calTab => {
   // Update add button label
   const addLabel = document.getElementById('cal-add-label');
   if(addLabel) addLabel.textContent = isFer ? 'Férias' : 'Escalar';
-  // Update desktop nav active state
-  const navFer = document.getElementById('nav-calendario');
-  const navEsc = document.getElementById('nav-escala');
-  if(navFer) navFer.classList.toggle('active', isFer);
-  if(navEsc) navEsc.classList.toggle('active', !isFer);
   // Update bottom nav
   const bFer = document.getElementById('bnav-calendario');
   const bEsc = document.getElementById('bnav-escala');
@@ -955,18 +950,10 @@ window.switchTab=tab=>{
     document.getElementById(`main-${t}`).style.display=t===tab?'flex':'none';
   });
   // nav items
-  ['calendario','escala','ferias','plantao'].forEach(t=>{
+  ['calendario','ferias','plantao'].forEach(t=>{
     const navEl=document.getElementById(`nav-${t}`);
-    if(navEl) navEl.classList.remove('active');
+    if(navEl) navEl.classList.toggle('active', t===tab);
   });
-  if(tab==='calendario'){
-    const activeNav = currentCalTab==='ferias_cal' ? 'nav-calendario' : 'nav-escala';
-    const el=document.getElementById(activeNav);
-    if(el) el.classList.add('active');
-  } else {
-    const navEl=document.getElementById(`nav-${tab}`);
-    if(navEl) navEl.classList.add('active');
-  }
   closeMenuDrawer();
   if(tab==='ferias') renderFerias();
   if(tab==='plantao') renderPlantao();
