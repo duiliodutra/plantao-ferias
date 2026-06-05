@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plantão & Férias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#f5f3ef; --surface:#fff; --surface2:#f0ede8; --border:#e0dbd3;
+  --text:#1a1916; --text2:#6b6860; --text3:#a8a49e;
+  --accent:#2d5be3; --accent-bg:#edf0fd; --radius:10px; --radius-lg:14px;
+}
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; overflow:hidden; }
+
+/* ── Auth Screen ── */
+#auth-screen {
+  position:fixed; inset:0; background:var(--bg); z-index:200;
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:0;
+}
+.auth-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:20px;
+  padding:40px 44px; width:360px; text-align:center;
+  box-shadow:0 4px 32px rgba(0,0,0,0.08);
+}
+.auth-logo { font-size:22px; font-weight:700; letter-spacing:-0.03em; margin-bottom:4px; }
+.auth-sub { font-size:12px; color:var(--text3); font-family:'DM Mono',monospace; margin-bottom:32px; }
+.auth-divider { display:flex; align-items:center; gap:12px; margin:20px 0; }
+.auth-divider span { font-size:11px; color:var(--text3); white-space:nowrap; }
+.auth-divider::before, .auth-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.btn-google {
+  display:flex; align-items:center; justify-content:center; gap:10px; width:100%;
+  padding:11px 20px; border:1px solid var(--border); border-radius:10px;
+  background:var(--surface); cursor:pointer; font-size:14px; font-weight:500;
+  font-family:'DM Sans',sans-serif; color:var(--text); transition:background 0.15s;
+}
+.btn-google:hover { background:var(--surface2); }
+.btn-google svg { flex-shrink:0; }
+.btn-guest {
+  display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+  padding:10px 20px; border:none; border-radius:10px; background:none;
+  cursor:pointer; font-size:13px; color:var(--text2); font-family:'DM Sans',sans-serif;
+  transition:background 0.15s;
+}
+.btn-guest:hover { background:var(--surface2); }
+.auth-notice { font-size:11px; color:var(--text3); margin-top:16px; line-height:1.6; }
+
+/* ── User bar (top of sidebar) ── */
+.user-bar {
+  display:flex; align-items:center; gap:10px; padding:14px 16px;
+  border-bottom:1px solid var(--border);
+}
+.user-avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+.user-avatar-placeholder {
+  width:32px; height:32px; border-radius:50%; background:var(--surface2);
+  display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;
+}
+.user-name { font-size:13px; font-weight:500; flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.user-role { font-size:10px; color:var(--text3); }
+.btn-signout {
+  border:none; background:none; cursor:pointer; color:var(--text3); font-size:16px;
+  display:flex; align-items:center; padding:4px; border-radius:6px; transition:background 0.15s;
+}
+.btn-signout:hover { background:var(--surface2); color:var(--text2); }
+
+/* ── Read-only banner ── */
+.readonly-banner {
+  display:none; align-items:center; gap:8px; padding:8px 20px;
+  background:#fffbf0; border-bottom:1px solid #f0e4b0;
+  font-size:12px; color:#8a6c10;
+}
+.readonly-banner.show { display:flex; }
+.readonly-banner i { font-size:15px; }
+
+/* ── Sidebar ── */
+.sidebar { width:230px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+.sidebar-logo { padding:16px 18px 12px; border-bottom:1px solid var(--border); }
+.logo-text { font-size:16px; font-weight:600; letter-spacing:-0.02em; }
+.logo-sub { font-size:11px; color:var(--text3); margin-top:2px; font-family:'DM Mono',monospace; }
+.nav-section { padding:14px 12px 8px; }
+.nav-label { font-size:10px; font-weight:600; letter-spacing:0.08em; color:var(--text3); padding:0 6px; margin-bottom:4px; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:8px; border:none; background:none; cursor:pointer; width:100%; text-align:left; font-size:13.5px; color:var(--text2); font-family:'DM Sans',sans-serif; transition:background 0.15s,color 0.15s; }
+.nav-item:hover { background:var(--surface2); color:var(--text); }
+.nav-item.active { background:var(--accent-bg); color:var(--accent); font-weight:500; }
+.nav-item i { font-size:16px; }
+.emp-section { padding:14px 12px; border-top:1px solid var(--border); flex:1; }
+.emp-row { display:flex; align-items:center; gap:8px; padding:5px 4px; }
+.emp-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.emp-name-s { font-size:13px; color:var(--text); flex:1; }
+.badge-sm { font-size:10px; padding:2px 7px; border-radius:20px; font-weight:500; }
+.sidebar-footer { padding:12px; border-top:1px solid var(--border); }
+.add-event-btn { display:flex; align-items:center; gap:7px; width:100%; padding:8px 12px; border:1.5px dashed var(--border); border-radius:8px; background:none; cursor:pointer; font-size:13px; color:var(--text2); font-family:'DM Sans',sans-serif; transition:background 0.15s,border-color 0.15s; }
+.add-event-btn:hover { background:var(--surface2); border-color:var(--text3); }
+
+/* ── Main ── */
+.main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+.toolbar { display:flex; align-items:center; gap:10px; padding:12px 20px; background:var(--surface); border-bottom:1px solid var(--border); }
+.toolbar-title { font-size:15px; font-weight:600; flex:1; letter-spacing:-0.01em; }
+.nav-btn { border:1px solid var(--border); background:var(--surface); padding:6px 11px; border-radius:7px; cursor:pointer; font-size:13px; color:var(--text); display:flex; align-items:center; gap:5px; transition:background 0.1s; }
+.nav-btn:hover { background:var(--surface2); }
+.view-toggle { display:flex; border:1px solid var(--border); border-radius:7px; overflow:hidden; }
+.vtab { padding:6px 13px; border:none; background:none; cursor:pointer; font-size:12px; color:var(--text2); font-family:'DM Sans',sans-serif; }
+.vtab.active { background:var(--surface2); color:var(--text); font-weight:500; }
+
+/* ── Stats ── */
+.stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:12px 20px; background:var(--bg); border-bottom:1px solid var(--border); }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:10px 14px; }
+.stat-val { font-size:22px; font-weight:600; letter-spacing:-0.03em; }
+.stat-lbl { font-size:11px; color:var(--text3); margin-top:1px; }
+
+/* ── Calendar ── */
+.cal-wrap { flex:1; overflow-y:auto; }
+.weekday-row { display:grid; grid-template-columns:repeat(7,1fr); background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:2; }
+.wday { text-align:center; font-size:11px; font-weight:600; letter-spacing:0.06em; color:var(--text3); padding:9px 0; }
+.wday.weekend { color:#c0533a; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); background:var(--border); gap:1px; }
+.cal-day { background:var(--surface); min-height:88px; padding:7px; cursor:pointer; position:relative; transition:background 0.12s; }
+.cal-day:hover { background:#faf8f5; }
+.cal-day.other-month { background:#faf9f7; }
+.cal-day.today { background:#f0f4fe; }
+.cal-day.weekend-day { background:#fdf8f6; }
+.cal-day.holiday-day { background:#fffbf0; }
+.day-num { font-size:12px; font-weight:500; color:var(--text2); margin-bottom:4px; font-family:'DM Mono',monospace; }
+.cal-day.today .day-num { color:var(--accent); font-weight:700; }
+.cal-day.other-month .day-num { color:var(--text3); }
+.cal-day.weekend-day .day-num { color:#c0533a; }
+.holiday-tag { font-size:9px; color:#8a6c10; font-weight:600; margin-bottom:3px; background:#fff8e0; padding:1px 5px; border-radius:3px; display:inline-block; }
+.event-chip { font-size:10.5px; padding:2px 6px; border-radius:4px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:500; display:block; }
+.cal-add { position:absolute; bottom:5px; right:5px; width:20px; height:20px; border-radius:50%; border:1px solid var(--border); background:var(--surface); cursor:pointer; display:none; align-items:center; justify-content:center; font-size:13px; color:var(--text3); }
+.cal-day:hover .cal-add { display:flex; }
+
+/* ── Férias Panel ── */
+.panel-body { flex:1; overflow-y:auto; padding:20px; }
+.period-filter-bar { display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+.filter-label { font-size:12px; color:var(--text3); font-weight:500; }
+.period-chip { padding:5px 14px; border-radius:20px; border:1px solid var(--border); background:var(--surface); font-size:12px; cursor:pointer; color:var(--text2); font-family:'DM Sans',sans-serif; transition:background 0.15s,border-color 0.15s; }
+.period-chip.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:500; }
+.period-chip:hover:not(.active) { background:var(--surface2); }
+.emp-ferias-block { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); margin-bottom:14px; overflow:hidden; }
+.emp-ferias-header { display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.12s; }
+.emp-ferias-header:hover { background:#faf9f7; }
+.emp-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; flex-shrink:0; }
+.emp-hdr-name { font-size:14px; font-weight:600; }
+.emp-hdr-sub { font-size:11px; color:var(--text3); margin-top:1px; }
+.emp-hdr-right { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.days-left-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; font-family:'DM Mono',monospace; }
+.collapse-icon { font-size:16px; color:var(--text3); transition:transform 0.2s; }
+.collapse-icon.open { transform:rotate(180deg); }
+.emp-ferias-body { padding:12px 18px 16px; }
+.period-row { display:flex; align-items:flex-start; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+.period-row:last-child { border-bottom:none; }
+.period-year-badge { font-size:11px; padding:3px 9px; border-radius:6px; font-weight:600; font-family:'DM Mono',monospace; white-space:nowrap; flex-shrink:0; margin-top:2px; }
+.period-content { flex:1; }
+.period-parcelas { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+.parcela-chip { display:inline-flex; align-items:center; gap:5px; font-size:11.5px; padding:4px 10px; border-radius:6px; font-weight:500; cursor:pointer; transition:opacity 0.15s; }
+.parcela-chip:hover { opacity:0.8; }
+.parcela-del { font-size:12px; opacity:0.6; line-height:1; }
+.add-parcela-btn { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:4px 10px; border-radius:6px; border:1px dashed var(--border); background:none; cursor:pointer; color:var(--text3); font-family:'DM Sans',sans-serif; transition:background 0.15s; }
+.add-parcela-btn:hover { background:var(--surface2); color:var(--text2); }
+.period-progress { margin-top:6px; }
+.period-prog-bar { height:4px; background:var(--surface2); border-radius:2px; overflow:hidden; }
+.period-prog-fill { height:100%; border-radius:2px; }
+.period-prog-meta { display:flex; justify-content:space-between; font-size:10px; color:var(--text3); margin-top:3px; font-family:'DM Mono',monospace; }
+.add-period-row { padding-top:10px; border-top:1px dashed var(--border); margin-top:4px; }
+.add-period-btn { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 14px; border-radius:7px; border:1px dashed var(--border); background:none; cursor:pointer; color:var(--text2); font-family:'DM Sans',sans-serif; transition:background 0.15s; }
+.add-period-btn:hover { background:var(--surface2); }
+
+/* ── Plantão ── */
+.plantao-row { display:flex; align-items:center; padding:11px 0; border-bottom:1px solid var(--border); gap:14px; }
+.pl-date { width:110px; font-size:12px; color:var(--text2); font-family:'DM Mono',monospace; flex-shrink:0; }
+.pl-type { font-size:11px; padding:3px 9px; border-radius:20px; font-weight:600; flex-shrink:0; }
+.pl-chips { display:flex; gap:5px; flex:1; flex-wrap:wrap; }
+.pl-chip { font-size:11px; padding:3px 9px; border-radius:20px; font-weight:500; }
+.pl-add { border:1px dashed var(--border); background:none; padding:4px 11px; border-radius:7px; font-size:11px; cursor:pointer; color:var(--text2); font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:4px; flex-shrink:0; }
+.pl-add:hover { background:var(--surface2); }
+.empty-msg { font-size:13px; color:var(--text3); padding:30px 0; text-align:center; }
+
+/* ── Modals ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:100; display:none; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--surface); border-radius:var(--radius-lg); padding:24px; width:340px; box-shadow:0 8px 40px rgba(0,0,0,0.14); animation:pop 0.18s ease; }
+@keyframes pop { from{transform:scale(0.95);opacity:0;} to{transform:scale(1);opacity:1;} }
+.modal-title { font-size:15px; font-weight:600; margin-bottom:18px; letter-spacing:-0.01em; }
+.field-label { font-size:11px; font-weight:600; letter-spacing:0.04em; color:var(--text3); margin-bottom:5px; display:block; }
+.field-wrap { margin-bottom:14px; }
+select, input[type=date], input[type=number], input[type=text] { width:100%; padding:8px 11px; border:1px solid var(--border); border-radius:8px; font-size:13px; font-family:'DM Sans',sans-serif; background:var(--surface); color:var(--text); outline:none; transition:border-color 0.15s; }
+select:focus, input:focus { border-color:var(--accent); }
+.date-row { display:flex; gap:8px; }
+.date-row input { flex:1; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:6px; }
+.btn-cancel { padding:8px 16px; border:1px solid var(--border); background:none; border-radius:8px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; color:var(--text2); }
+.btn-cancel:hover { background:var(--surface2); }
+.btn-save { padding:8px 18px; border:none; background:var(--accent); color:#fff; border-radius:8px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:500; }
+.btn-save:hover { background:#1e47c9; }
+.btn-delete { padding:8px 14px; border:1px solid #fecaca; background:#fff5f5; color:#c0392b; border-radius:8px; font-size:13px; cursor:pointer; font-family:'DM Sans',sans-serif; margin-right:auto; }
+.btn-delete:hover { background:#fde8e8; }
+.modal-info { background:var(--accent-bg); border-radius:8px; padding:10px 12px; font-size:12px; color:#2d4cb0; margin-bottom:14px; line-height:1.5; }
+
+/* ── Spinner ── */
+.spinner-wrap { position:fixed; inset:0; background:var(--bg); z-index:300; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+.spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg);} }
+.spinner-label { font-size:13px; color:var(--text3); }
+
+/* ── Toast ── */
+.toast { position:fixed; bottom:24px; right:24px; background:#1a1916; color:#fff; padding:10px 18px; border-radius:8px; font-size:13px; z-index:999; opacity:0; transform:translateY(8px); transition:opacity 0.2s,transform 0.2s; pointer-events:none; }
+.toast.show { opacity:1; transform:translateY(0); }
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+/* Disable edit controls in read-only mode */
+body.readonly .add-event-btn,
+body.readonly .cal-add,
+body.readonly .add-parcela-btn,
+body.readonly .add-period-btn,
+body.readonly .add-period-row,
+body.readonly [data-admin-only] { display:none !important; }
+body.readonly .parcela-chip { cursor:default; pointer-events:none; }
+body.readonly .emp-ferias-header { cursor:default; }
+body.readonly .pl-add { display:none !important; }
+body.readonly .nav-btn[data-admin-only] { display:none !important; }
+</style>
+</head>
+<body>
+
+<!-- Spinner (loading state) -->
+<div class="spinner-wrap" id="spinner">
+  <div class="spinner"></div>
+  <div class="spinner-label">Carregando...</div>
+</div>
+
+<!-- Auth Screen -->
+<div id="auth-screen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">Plantão & Férias</div>
+    <div class="auth-sub">controle de escala</div>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.35-8.16 2.35-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Entrar com Google
+    </button>
+    <div class="auth-divider"><span>ou</span></div>
+    <button class="btn-guest" onclick="continueAsGuest()">
+      <i class="ti ti-eye"></i> Visualizar sem login
+    </button>
+    <div class="auth-notice">Somente contas autorizadas podem editar dados. Visitantes têm acesso somente leitura.</div>
+  </div>
+</div>
+
+<!-- App (hidden until auth resolved) -->
+<div id="app-wrap" style="display:none; flex:1; overflow:hidden;">
+
+  <nav class="sidebar">
+    <div class="user-bar" id="user-bar">
+      <div class="user-avatar-placeholder" id="user-avatar-placeholder"><i class="ti ti-user" style="font-size:14px;color:var(--text3);"></i></div>
+      <div style="flex:1;min-width:0;">
+        <div class="user-name" id="user-name">Visitante</div>
+        <div class="user-role" id="user-role">somente leitura</div>
+      </div>
+      <button class="btn-signout" onclick="signOut()" title="Sair"><i class="ti ti-logout"></i></button>
+    </div>
+
+    <div class="sidebar-logo">
+      <div class="logo-text">Plantão & Férias</div>
+      <div class="logo-sub">controle de escala</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Visualização</div>
+      <button class="nav-item active" onclick="switchTab('calendario')" id="nav-calendario"><i class="ti ti-calendar"></i> Calendário</button>
+      <button class="nav-item" onclick="switchTab('ferias')" id="nav-ferias"><i class="ti ti-beach"></i> Férias</button>
+      <button class="nav-item" onclick="switchTab('plantao')" id="nav-plantao"><i class="ti ti-clock-hour-4"></i> Plantões</button>
+    </div>
+    <div class="emp-section">
+      <div class="nav-label" style="margin-bottom:8px;">Funcionários</div>
+      <div id="emp-list"></div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="add-event-btn" onclick="openCalModal(null)"><i class="ti ti-plus"></i> Adicionar evento</button>
+    </div>
+  </nav>
+
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
+    <!-- Read-only banner -->
+    <div class="readonly-banner" id="readonly-banner">
+      <i class="ti ti-eye"></i>
+      Você está em modo de visualização. Faça login com uma conta autorizada para editar.
+      <button onclick="showAuthScreen()" style="margin-left:auto;border:1px solid #d4a800;background:#fffbf0;padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;color:#8a6c10;">Entrar</button>
+    </div>
+
+    <!-- Calendário -->
+    <div class="main" id="main-calendario">
+      <div class="toolbar">
+        <button class="nav-btn" onclick="navigate(-1)"><i class="ti ti-chevron-left"></i></button>
+        <span class="toolbar-title" id="cal-month-label"></span>
+        <button class="nav-btn" onclick="navigate(1)"><i class="ti ti-chevron-right"></i></button>
+        <div class="view-toggle">
+          <button class="vtab active" id="vtab-mes" onclick="switchView('mes')">Mês</button>
+          <button class="vtab" id="vtab-lista" onclick="switchView('lista')">Lista</button>
+        </div>
+      </div>
+      <div class="stats-bar" id="stats-bar"></div>
+      <div class="cal-wrap">
+        <div class="weekday-row">
+          <div class="wday">SEG</div><div class="wday">TER</div><div class="wday">QUA</div>
+          <div class="wday">QUI</div><div class="wday">SEX</div>
+          <div class="wday weekend">SÁB</div><div class="wday weekend">DOM</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+    </div>
+
+    <!-- Férias -->
+    <div class="main" id="main-ferias" style="display:none;">
+      <div class="toolbar">
+        <span class="toolbar-title">Controle de Férias</span>
+        <button class="nav-btn" data-admin-only onclick="openPeriodModal()"><i class="ti ti-plus"></i> Novo período</button>
+      </div>
+      <div class="panel-body">
+        <div class="period-filter-bar" id="period-filter-bar"></div>
+        <div id="panel-ferias"></div>
+      </div>
+    </div>
+
+    <!-- Plantões -->
+    <div class="main" id="main-plantao" style="display:none;">
+      <div class="toolbar">
+        <button class="nav-btn" onclick="navigate(-1)"><i class="ti ti-chevron-left"></i></button>
+        <span class="toolbar-title" id="plantao-month-label"></span>
+        <button class="nav-btn" onclick="navigate(1)"><i class="ti ti-chevron-right"></i></button>
+        <button class="nav-btn" data-admin-only onclick="openCalModal(null,'plantao')"><i class="ti ti-plus"></i> Escalar</button>
+      </div>
+      <div class="panel-body" id="panel-plantao"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Calendário/Plantão -->
+<div class="modal-overlay" id="cal-modal-overlay" onclick="handleCalOverlay(event)">
+  <div class="modal-box">
+    <div class="modal-title" id="cal-modal-title">Novo evento</div>
+    <div class="field-wrap"><label class="field-label">FUNCIONÁRIO</label><select id="cm-emp"></select></div>
+    <div class="field-wrap"><label class="field-label">TIPO</label>
+      <select id="cm-type"><option value="ferias">🏖 Férias</option><option value="plantao">⚕ Plantão</option></select>
+    </div>
+    <div class="field-wrap" id="cm-period-wrap"><label class="field-label">PERÍODO AQUISITIVO</label><select id="cm-period"></select></div>
+    <div class="field-wrap"><label class="field-label">DATAS</label>
+      <div class="date-row"><input type="date" id="cm-start"/><input type="date" id="cm-end"/></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-delete" id="cm-btn-delete" style="display:none;" onclick="deleteCalEvent()"><i class="ti ti-trash"></i></button>
+      <button class="btn-cancel" onclick="closeCalModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveCalEvent()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Período aquisitivo -->
+<div class="modal-overlay" id="period-modal-overlay" onclick="handlePeriodOverlay(event)">
+  <div class="modal-box">
+    <div class="modal-title">Novo período aquisitivo</div>
+    <div class="modal-info">O período aquisitivo representa o ano de trabalho que gera direito a férias.<br>Ex: <strong>2024/2025</strong> = trabalhou de nov/2024 a nov/2025.</div>
+    <div class="field-wrap"><label class="field-label">FUNCIONÁRIO</label><select id="pm-emp"></select></div>
+    <div class="field-wrap"><label class="field-label">ANO INICIAL</label><input type="number" id="pm-year-start" min="2020" max="2035" value="2025" style="width:140px;"/></div>
+    <div class="field-wrap"><label class="field-label">DIREITO A FÉRIAS (dias)</label><input type="number" id="pm-days" min="1" max="60" value="30" style="width:140px;"/></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePeriodModal()">Cancelar</button>
+      <button class="btn-save" onclick="savePeriod()">Criar período</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Parcela de férias -->
+<div class="modal-overlay" id="parcela-modal-overlay" onclick="handleParcelaOverlay(event)">
+  <div class="modal-box">
+    <div class="modal-title" id="parcela-modal-title">Adicionar parcela</div>
+    <div class="field-wrap"><label class="field-label">DATAS DAS FÉRIAS</label>
+      <div class="date-row"><input type="date" id="parc-start"/><input type="date" id="parc-end"/></div>
+    </div>
+    <div class="field-wrap"><label class="field-label">OBSERVAÇÃO (opcional)</label><input type="text" id="parc-obs" placeholder="Ex: 1ª parcela"/></div>
+    <div class="modal-actions">
+      <button class="btn-delete" id="parc-btn-delete" style="display:none;" onclick="deleteParcela()"><i class="ti ti-trash"></i></button>
+      <button class="btn-cancel" onclick="closeParcelaModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveParcela()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+// ════════════════════════════════════════════════════════
+//  ⚙️  CONFIGURAÇÃO — edite apenas esta seção
+// ════════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD9h_yalqNFqjB_kVCSLpx1UiB2aOsk_Us",
+  authDomain: "plantao-ferias.firebaseapp.com",
+  projectId: "plantao-ferias",
+  storageBucket: "plantao-ferias.firebasestorage.app",
+  messagingSenderId: "972609076253",
+  appId: "1:972609076253:web:b571c3fd027e0797461af4"
+};
+
+// Lista de e-mails com permissão de EDITAR (admin)
+// Adicione quantos quiser separados por vírgula
+const ADMIN_EMAILS = [
+  "duiliodudu@gmail.com",
+  // "outro@gmail.com",  ← adicione mais e-mails aqui se precisar
+];
+// ════════════════════════════════════════════════════════
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as fbSignOut }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+import { getFirestore, doc, collection, getDocs, setDoc, deleteDoc, onSnapshot, writeBatch }
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const app  = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// ── Constantes de domínio ──
+const EMPLOYEES = [
+  { name:'Donizete',  bg:'#fdf0ec', mid:'#e08060', text:'#7a3520' },
+  { name:'Vinicius',  bg:'#efedfe', mid:'#8a84d8', text:'#3c3489' },
+  { name:'Wenderson', bg:'#e8f1fd', mid:'#5a90d0', text:'#0c447c' },
+  { name:'Jackson',   bg:'#eef6e2', mid:'#72b030', text:'#2e5c0e' },
+  { name:'Felipe',    bg:'#fef5e3', mid:'#d89020', text:'#6b3c08' },
+  { name:'Deyse',     bg:'#fcedf4', mid:'#d06090', text:'#722440' },
+];
+const HOLIDAYS = {
+  '2026-06-04':'Corpus Christi','2026-09-07':'Ind. do Brasil',
+  '2026-10-12':'N.Sra. Aparecida','2026-11-02':'Finados',
+  '2026-11-15':'Proc. República','2026-12-25':'Natal',
+};
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+// ── Estado local ──
+let calEvents = [];
+let periods   = [];
+let currentDate = new Date(2026, 5, 1);
+let currentTab  = 'calendario';
+let selectedPeriodYear = 'all';
+let editingCalId   = null;
+let editingPeriodId  = null;
+let editingParcelaId = null;
+let isAdmin = false;
+let currentUser = null;
+
+// ── Utils ──
+const getEmp   = n => EMPLOYEES.find(e => e.name === n);
+const pad      = n => String(n).padStart(2, '0');
+const ds       = (y,m,d) => `${y}-${pad(m)}-${pad(d)}`;
+const inRange  = (date, s, e) => date >= s && date <= e;
+const initials = n => n.substring(0,2).toUpperCase();
+const fmtDate  = s => new Date(s+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+const periodLabel = p => `${p.yearStart}/${p.yearStart+1}`;
+const parcelaDays = p => p.parcelas.reduce((acc, parc) => {
+  return acc + Math.round((new Date(parc.end+'T12:00:00') - new Date(parc.start+'T12:00:00'))/86400000)+1;
+}, 0);
+const allFeriasEvents = () => periods.flatMap(per =>
+  per.parcelas.map(parc => ({ emp:per.emp, type:'ferias', start:parc.start, end:parc.end, periodId:per.id, parcelaId:parc.id }))
+);
+const allEvents = () => [...calEvents, ...allFeriasEvents()];
+const eventsForDate = d => allEvents().filter(ev => inRange(d, ev.start, ev.end));
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Firestore helpers ──
+async function loadData() {
+  const [calSnap, perSnap] = await Promise.all([
+    getDocs(collection(db, 'calEvents')),
+    getDocs(collection(db, 'periods')),
+  ]);
+  calEvents = calSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  periods   = perSnap.docs.map(d => ({ id: d.id, ...d.data(), parcelas: d.data().parcelas || [] }));
+}
+
+async function saveCalEventFS(ev) {
+  await setDoc(doc(db, 'calEvents', ev.id), ev);
+}
+async function deleteCalEventFS(id) {
+  await deleteDoc(doc(db, 'calEvents', id));
+}
+async function savePeriodFS(per) {
+  await setDoc(doc(db, 'periods', per.id), per);
+}
+
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ── Auth ──
+window.signInWithGoogle = async () => {
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  } catch(e) { showToast('Erro ao fazer login: ' + e.message); }
+};
+
+window.continueAsGuest = () => {
+  currentUser = null;
+  isAdmin = false;
+  applyRole();
+  startApp();
+};
+
+window.signOut = async () => {
+  if (currentUser) await fbSignOut(auth);
+  currentUser = null; isAdmin = false;
+  document.getElementById('app-wrap').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+};
+
+window.showAuthScreen = () => {
+  document.getElementById('app-wrap').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+};
+
+function applyRole() {
+  const body = document.body;
+  const banner = document.getElementById('readonly-banner');
+  if (isAdmin) {
+    body.classList.remove('readonly');
+    banner.classList.remove('show');
+    document.getElementById('user-role').textContent = 'administrador';
+  } else {
+    body.classList.add('readonly');
+    banner.classList.add('show');
+    document.getElementById('user-role').textContent = 'somente leitura';
+  }
+
+  const nameEl = document.getElementById('user-name');
+  const avatarEl = document.getElementById('user-avatar-placeholder');
+  if (currentUser) {
+    nameEl.textContent = currentUser.displayName || currentUser.email;
+    if (currentUser.photoURL) {
+      avatarEl.innerHTML = `<img src="${currentUser.photoURL}" class="user-avatar" referrerpolicy="no-referrer"/>`;
+    }
+  } else {
+    nameEl.textContent = 'Visitante';
+    avatarEl.innerHTML = '<i class="ti ti-user" style="font-size:14px;color:var(--text3);"></i>';
+  }
+}
+
+async function startApp() {
+  document.getElementById('spinner').style.display = 'flex';
+  document.getElementById('auth-screen').style.display = 'none';
+  await loadData();
+  document.getElementById('spinner').style.display = 'none';
+  document.getElementById('app-wrap').style.display = 'flex';
+  renderCalendar();
+}
+
+// Auth state listener
+onAuthStateChanged(auth, async user => {
+  document.getElementById('spinner').style.display = 'none';
+  if (user) {
+    currentUser = user;
+    isAdmin = ADMIN_EMAILS.map(e=>e.toLowerCase()).includes(user.email.toLowerCase());
+    applyRole();
+    startApp();
+  } else {
+    // No user logged in — show auth screen
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+});
+
+// ── Sidebar ──
+function renderEmpList() {
+  const today = '2026-06-05';
+  document.getElementById('emp-list').innerHTML = EMPLOYEES.map(e => {
+    const onFer = allFeriasEvents().some(ev => ev.emp===e.name && inRange(today,ev.start,ev.end));
+    return `<div class="emp-row">
+      <div class="emp-dot" style="background:${e.mid};"></div>
+      <span class="emp-name-s">${e.name}</span>
+      <span class="badge-sm" style="background:${onFer?'#fdf0ec':'#eef6e2'};color:${onFer?'#7a3520':'#2e5c0e'};">${onFer?'férias':'ativo'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Stats ──
+function renderStats() {
+  const y=currentDate.getFullYear(), m=currentDate.getMonth();
+  const ms=ds(y,m+1,1), me=ds(y,m+1,new Date(y,m+1,0).getDate());
+  const ferSet=new Set(allFeriasEvents().filter(e=>e.start<=me&&e.end>=ms).map(e=>e.emp));
+  const plCt=calEvents.filter(e=>e.type==='plantao'&&e.start>=ms&&e.end<=me).length;
+  document.getElementById('stats-bar').innerHTML=`
+    <div class="stat-card"><div class="stat-val">${EMPLOYEES.length}</div><div class="stat-lbl">Funcionários</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#c0533a;">${ferSet.size}</div><div class="stat-lbl">Em férias</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#2d5be3;">${EMPLOYEES.length-ferSet.size}</div><div class="stat-lbl">Disponíveis</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#2e5c0e;">${plCt}</div><div class="stat-lbl">Plantões</div></div>
+  `;
+}
+
+// ── Calendar ──
+function renderCalendar() {
+  const y=currentDate.getFullYear(), m=currentDate.getMonth();
+  document.getElementById('cal-month-label').textContent=`${MONTHS[m]} ${y}`;
+  document.getElementById('plantao-month-label').textContent=`${MONTHS[m]} ${y}`;
+  const firstDow=new Date(y,m,1).getDay();
+  const offset=firstDow===0?6:firstDow-1;
+  const dim=new Date(y,m+1,0).getDate();
+  const prevDays=new Date(y,m,0).getDate();
+  const totalCells=Math.ceil((offset+dim)/7)*7;
+  const todayStr='2026-06-05';
+  let html='';
+  for(let i=0;i<totalCells;i++){
+    let day,cy=y,cm=m,other=false;
+    if(i<offset){day=prevDays-offset+i+1;cm=m-1;if(cm<0){cm=11;cy--;}other=true;}
+    else if(i>=offset+dim){day=i-offset-dim+1;cm=m+1;if(cm>11){cm=0;cy++;}other=true;}
+    else{day=i-offset+1;}
+    const dateS=ds(cy,cm+1,day);
+    const dow=i%7;
+    const isWeekend=!other&&(dow===5||dow===6);
+    const holiday=!other&&HOLIDAYS[dateS];
+    const isToday=dateS===todayStr;
+    const dayEvs=eventsForDate(dateS);
+    let cls='cal-day';
+    if(other) cls+=' other-month';
+    if(isWeekend) cls+=' weekend-day';
+    if(holiday) cls+=' holiday-day';
+    if(isToday) cls+=' today';
+    let inner=`<div class="day-num">${day}</div>`;
+    if(holiday) inner+=`<div class="holiday-tag">${holiday}</div>`;
+    dayEvs.slice(0,3).forEach(ev=>{
+      const emp=getEmp(ev.emp);
+      const label=ev.type==='plantao'?`⚕ ${ev.emp}`:ev.emp;
+      if(emp) inner+=`<span class="event-chip" style="background:${emp.bg};color:${emp.text};">${label}</span>`;
+    });
+    if(dayEvs.length>3) inner+=`<div style="font-size:10px;color:var(--text3);">+${dayEvs.length-3} mais</div>`;
+    if(isAdmin) inner+=`<button class="cal-add" onclick="openCalModal('${dateS}',null,event)" aria-label="Adicionar"><i class="ti ti-plus"></i></button>`;
+    html+=`<div class="${cls}" onclick="handleDayClick('${dateS}')">${inner}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+  renderStats(); renderEmpList();
+}
+
+window.handleDayClick = dateS => {
+  if(!isAdmin) return;
+  const evs=eventsForDate(dateS);
+  if(evs.length===1&&evs[0].type==='plantao') openEditCalModal(evs[0].id);
+  else openCalModal(dateS);
+};
+
+window.navigate = dir => {
+  currentDate=new Date(currentDate.getFullYear(),currentDate.getMonth()+dir,1);
+  renderCalendar(); renderPlantao();
+};
+
+window.switchTab = tab => {
+  currentTab=tab;
+  ['calendario','ferias','plantao'].forEach(t=>{
+    document.getElementById(`main-${t}`).style.display=t===tab?'flex':'none';
+    document.getElementById(`nav-${t}`).classList.toggle('active',t===tab);
+  });
+  if(tab==='ferias') renderFerias();
+  if(tab==='plantao') renderPlantao();
+};
+
+window.switchView = v => {
+  document.getElementById('vtab-mes').classList.toggle('active',v==='mes');
+  document.getElementById('vtab-lista').classList.toggle('active',v==='lista');
+};
+
+// ── Férias ──
+function allPeriodLabels() {
+  return [...new Set(periods.map(p=>periodLabel(p)))].sort();
+}
+
+window.setPeriodFilter = val => { selectedPeriodYear=val; renderFerias(); };
+
+function renderPeriodFilter() {
+  const labels=allPeriodLabels();
+  let html=`<span class="filter-label">Período:</span>`;
+  html+=`<button class="period-chip ${selectedPeriodYear==='all'?'active':''}" onclick="setPeriodFilter('all')">Todos</button>`;
+  labels.forEach(lbl=>{
+    html+=`<button class="period-chip ${selectedPeriodYear===lbl?'active':''}" onclick="setPeriodFilter('${lbl}')">${lbl}</button>`;
+  });
+  document.getElementById('period-filter-bar').innerHTML=html;
+}
+
+function renderFerias() {
+  renderPeriodFilter();
+  const el=document.getElementById('panel-ferias');
+  let html='';
+  EMPLOYEES.forEach(emp=>{
+    let empPeriods=periods.filter(p=>p.emp===emp.name);
+    if(selectedPeriodYear!=='all'){
+      const [ys]=selectedPeriodYear.split('/');
+      empPeriods=empPeriods.filter(p=>String(p.yearStart)===ys);
+    }
+    if(!empPeriods.length) return;
+    const totalUsed=empPeriods.reduce((a,p)=>a+parcelaDays(p),0);
+    const totalRight=empPeriods.reduce((a,p)=>a+p.totalDays,0);
+    const remaining=totalRight-totalUsed;
+    const blockId='empblock-'+emp.name.replace(/\s/g,'_');
+    html+=`<div class="emp-ferias-block">
+      <div class="emp-ferias-header" onclick="toggleEmpBlock('${blockId}')">
+        <div class="emp-avatar" style="background:${emp.bg};color:${emp.text};">${initials(emp.name)}</div>
+        <div>
+          <div class="emp-hdr-name">${emp.name}</div>
+          <div class="emp-hdr-sub">${empPeriods.length} período${empPeriods.length>1?'s':''} · ${totalUsed}/${totalRight} dias usados</div>
+        </div>
+        <div class="emp-hdr-right">
+          <span class="days-left-badge" style="background:${remaining>0?'#eef6e2':'#fdf0ec'};color:${remaining>0?'#2e5c0e':'#7a3520'};">${remaining}d restantes</span>
+          <i class="ti ti-chevron-down collapse-icon open" id="icon-${emp.name.replace(/\s/g,'_')}"></i>
+        </div>
+      </div>
+      <div class="emp-ferias-body" id="${blockId}">`;
+
+    empPeriods.sort((a,b)=>b.yearStart-a.yearStart).forEach(per=>{
+      const used=parcelaDays(per);
+      const pct=Math.min(100,Math.round(used/per.totalDays*100));
+      html+=`<div class="period-row">
+        <div class="period-year-badge" style="background:${emp.bg};color:${emp.text};">${periodLabel(per)}</div>
+        <div class="period-content">
+          <div class="period-parcelas">`;
+      per.parcelas.forEach(parc=>{
+        const days=Math.round((new Date(parc.end+'T12:00:00')-new Date(parc.start+'T12:00:00'))/86400000)+1;
+        html+=`<span class="parcela-chip" style="background:${emp.bg};color:${emp.text};" onclick="openParcelaModal('${per.id}','${parc.id}',event)">
+          ${fmtDate(parc.start)} → ${fmtDate(parc.end)} · ${days}d${parc.obs?` · ${parc.obs}`:''}
+          ${isAdmin?'<span class="parcela-del">✕</span>':''}
+        </span>`;
+      });
+      if(isAdmin) html+=`<button class="add-parcela-btn" onclick="openParcelaModal('${per.id}',null,event)"><i class="ti ti-plus"></i> parcela</button>`;
+      html+=`</div>
+          <div class="period-progress">
+            <div class="period-prog-bar"><div class="period-prog-fill" style="width:${pct}%;background:${emp.mid};"></div></div>
+            <div class="period-prog-meta"><span>${used} dias usados</span><span>${per.totalDays-used} restantes de ${per.totalDays}d</span></div>
+          </div>
+        </div></div>`;
+    });
+
+    if(isAdmin) html+=`<div class="add-period-row"><button class="add-period-btn" onclick="openPeriodModalFor('${emp.name}',event)"><i class="ti ti-plus"></i> Adicionar período aquisitivo</button></div>`;
+    html+=`</div></div>`;
+  });
+  el.innerHTML=html||'<div class="empty-msg"><i class="ti ti-beach" style="font-size:32px;display:block;margin:0 auto 8px;"></i>Nenhum período cadastrado.</div>';
+}
+
+window.toggleEmpBlock = id => {
+  const el=document.getElementById(id);
+  const key=id.replace('empblock-','');
+  const icon=document.getElementById('icon-'+key);
+  const open=el.style.display!=='none';
+  el.style.display=open?'none':'block';
+  if(icon) icon.classList.toggle('open',!open);
+};
+
+// ── Plantão ──
+function renderPlantao() {
+  const y=currentDate.getFullYear(),m=currentDate.getMonth();
+  const dim=new Date(y,m+1,0).getDate();
+  let html='';
+  for(let d=1;d<=dim;d++){
+    const date=new Date(y,m,d);
+    const dow=date.getDay();
+    const dateS=ds(y,m+1,d);
+    const holiday=HOLIDAYS[dateS];
+    if(dow!==0&&dow!==6&&!holiday) continue;
+    let type='',typeBg='',typeColor='';
+    if(holiday){type=holiday;typeBg='#fff8e0';typeColor='#8a6c10';}
+    else if(dow===6){type='Sábado';typeBg='#fdf0ec';typeColor='#7a3520';}
+    else{type='Domingo';typeBg='#fcedf4';typeColor='#722440';}
+    const dayPl=calEvents.filter(e=>e.type==='plantao'&&inRange(dateS,e.start,e.end));
+    const chips=dayPl.map(e=>{
+      const emp=getEmp(e.emp);
+      return `<span class="pl-chip" style="background:${emp?.bg};color:${emp?.text};" ${isAdmin?`onclick="openEditCalModal('${e.id}',event)"`:''}>${e.emp}</span>`;
+    }).join('');
+    const fmtD=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',weekday:'short'});
+    html+=`<div class="plantao-row">
+      <div class="pl-date">${fmtD}</div>
+      <span class="pl-type" style="background:${typeBg};color:${typeColor};">${type}</span>
+      <div class="pl-chips">${chips||'<span style="font-size:11px;color:var(--text3);">Sem escala</span>'}</div>
+      ${isAdmin?`<button class="pl-add" onclick="openCalModal('${dateS}','plantao',event)"><i class="ti ti-plus"></i> Escalar</button>`:''}
+    </div>`;
+  }
+  document.getElementById('panel-plantao').innerHTML=html||'<div class="empty-msg">Sem fins de semana neste mês.</div>';
+}
+
+// ── Modal: Cal event ──
+window.openCalModal = (dateS, defaultType, ev) => {
+  if(!isAdmin){showToast('Sem permissão para editar.');return;}
+  if(ev) ev.stopPropagation();
+  editingCalId=null;
+  document.getElementById('cal-modal-title').textContent=dateS?`Evento em ${fmtDate(dateS)}`:'Novo evento';
+  document.getElementById('cm-emp').innerHTML=EMPLOYEES.map(e=>`<option>${e.name}</option>`).join('');
+  document.getElementById('cm-type').value=defaultType||'ferias';
+  document.getElementById('cm-start').value=dateS||'';
+  document.getElementById('cm-end').value=dateS||'';
+  document.getElementById('cm-btn-delete').style.display='none';
+  updateCalModalPeriods();
+  document.getElementById('cm-type').onchange=updateCalModalPeriods;
+  document.getElementById('cm-emp').onchange=updateCalModalPeriods;
+  document.getElementById('cal-modal-overlay').classList.add('open');
+};
+
+function updateCalModalPeriods(){
+  const emp=document.getElementById('cm-emp').value;
+  const type=document.getElementById('cm-type').value;
+  const wrap=document.getElementById('cm-period-wrap');
+  const sel=document.getElementById('cm-period');
+  if(type==='ferias'){
+    const ep=periods.filter(p=>p.emp===emp);
+    if(ep.length){
+      sel.innerHTML=ep.map(p=>`<option value="${p.id}">${periodLabel(p)} (${p.totalDays-parcelaDays(p)}d restantes)</option>`).join('');
+      wrap.style.display='block';
+    } else { wrap.style.display='none'; }
+  } else { wrap.style.display='none'; }
+}
+
+window.openEditCalModal = (id, ev) => {
+  if(!isAdmin) return;
+  if(ev) ev.stopPropagation();
+  const event=calEvents.find(e=>e.id===id);
+  if(!event) return;
+  editingCalId=id;
+  document.getElementById('cal-modal-title').textContent='Editar plantão';
+  document.getElementById('cm-emp').innerHTML=EMPLOYEES.map(e=>`<option ${e.name===event.emp?'selected':''}>${e.name}</option>`).join('');
+  document.getElementById('cm-type').value=event.type;
+  document.getElementById('cm-start').value=event.start;
+  document.getElementById('cm-end').value=event.end;
+  document.getElementById('cm-btn-delete').style.display='block';
+  document.getElementById('cm-period-wrap').style.display='none';
+  document.getElementById('cal-modal-overlay').classList.add('open');
+};
+
+window.closeCalModal = () => { document.getElementById('cal-modal-overlay').classList.remove('open'); editingCalId=null; };
+window.handleCalOverlay = e => { if(e.target===document.getElementById('cal-modal-overlay')) closeCalModal(); };
+
+window.saveCalEvent = async () => {
+  if(!isAdmin) return;
+  const emp=document.getElementById('cm-emp').value;
+  const type=document.getElementById('cm-type').value;
+  const start=document.getElementById('cm-start').value;
+  const end=document.getElementById('cm-end').value;
+  if(!start||!end){showToast('Preencha as datas.');return;}
+  if(start>end){showToast('Data inicial maior que final.');return;}
+
+  if(type==='ferias'){
+    const periodId=document.getElementById('cm-period').value;
+    const per=periods.find(p=>p.id===periodId);
+    if(!per){showToast('Selecione um período aquisitivo.');return;}
+    const newParc={id:genId(),start,end,obs:''};
+    per.parcelas.push(newParc);
+    await savePeriodFS(per);
+    showToast('Férias adicionadas ✓');
+    closeCalModal(); renderCalendar(); renderFerias(); renderEmpList();
+    return;
+  }
+
+  const evObj={id:editingCalId||genId(),emp,type,start,end};
+  if(editingCalId){
+    const idx=calEvents.findIndex(e=>e.id===editingCalId);
+    if(idx>=0) calEvents[idx]=evObj;
+    showToast('Plantão atualizado ✓');
+  } else {
+    calEvents.push(evObj);
+    showToast('Plantão salvo ✓');
+  }
+  await saveCalEventFS(evObj);
+  closeCalModal(); renderCalendar(); renderPlantao(); renderEmpList();
+};
+
+window.deleteCalEvent = async () => {
+  if(!isAdmin||!editingCalId) return;
+  await deleteCalEventFS(editingCalId);
+  calEvents=calEvents.filter(e=>e.id!==editingCalId);
+  closeCalModal(); renderCalendar(); renderPlantao();
+  showToast('Evento removido.');
+};
+
+// ── Modal: Período aquisitivo ──
+window.openPeriodModal = () => openPeriodModalFor(EMPLOYEES[0].name);
+window.openPeriodModalFor = (empName, ev) => {
+  if(!isAdmin){showToast('Sem permissão.');return;}
+  if(ev) ev.stopPropagation();
+  document.getElementById('pm-emp').innerHTML=EMPLOYEES.map(e=>`<option ${e.name===empName?'selected':''}>${e.name}</option>`).join('');
+  document.getElementById('pm-year-start').value=2025;
+  document.getElementById('pm-days').value=30;
+  document.getElementById('period-modal-overlay').classList.add('open');
+};
+window.closePeriodModal = () => document.getElementById('period-modal-overlay').classList.remove('open');
+window.handlePeriodOverlay = e => { if(e.target===document.getElementById('period-modal-overlay')) closePeriodModal(); };
+
+window.savePeriod = async () => {
+  if(!isAdmin) return;
+  const emp=document.getElementById('pm-emp').value;
+  const yearStart=parseInt(document.getElementById('pm-year-start').value);
+  const totalDays=parseInt(document.getElementById('pm-days').value);
+  if(!yearStart||!totalDays){showToast('Preencha todos os campos.');return;}
+  if(periods.find(p=>p.emp===emp&&p.yearStart===yearStart)){showToast(`${emp} já tem o período ${yearStart}/${yearStart+1}.`);return;}
+  const newPer={id:genId(),emp,yearStart,totalDays,parcelas:[]};
+  periods.push(newPer);
+  await savePeriodFS(newPer);
+  closePeriodModal(); renderFerias();
+  showToast(`Período ${yearStart}/${yearStart+1} criado para ${emp} ✓`);
+};
+
+// ── Modal: Parcela ──
+window.openParcelaModal = (periodId, parcelaId, ev) => {
+  if(!isAdmin){showToast('Sem permissão.');return;}
+  if(ev) ev.stopPropagation();
+  editingPeriodId=periodId; editingParcelaId=parcelaId;
+  const per=periods.find(p=>p.id===periodId);
+  if(parcelaId){
+    const parc=per.parcelas.find(p=>p.id===parcelaId);
+    document.getElementById('parcela-modal-title').textContent=`Editar parcela · ${periodLabel(per)} · ${per.emp}`;
+    document.getElementById('parc-start').value=parc.start;
+    document.getElementById('parc-end').value=parc.end;
+    document.getElementById('parc-obs').value=parc.obs||'';
+    document.getElementById('parc-btn-delete').style.display='block';
+  } else {
+    document.getElementById('parcela-modal-title').textContent=`Nova parcela · ${periodLabel(per)} · ${per.emp}`;
+    document.getElementById('parc-start').value='';
+    document.getElementById('parc-end').value='';
+    document.getElementById('parc-obs').value='';
+    document.getElementById('parc-btn-delete').style.display='none';
+  }
+  document.getElementById('parcela-modal-overlay').classList.add('open');
+};
+window.closeParcelaModal = () => { document.getElementById('parcela-modal-overlay').classList.remove('open'); editingPeriodId=null; editingParcelaId=null; };
+window.handleParcelaOverlay = e => { if(e.target===document.getElementById('parcela-modal-overlay')) closeParcelaModal(); };
+
+window.saveParcela = async () => {
+  if(!isAdmin) return;
+  const start=document.getElementById('parc-start').value;
+  const end=document.getElementById('parc-end').value;
+  const obs=document.getElementById('parc-obs').value;
+  if(!start||!end){showToast('Preencha as datas.');return;}
+  if(start>end){showToast('Data inicial maior que final.');return;}
+  const per=periods.find(p=>p.id===editingPeriodId);
+  if(!per) return;
+  if(editingParcelaId){
+    const idx=per.parcelas.findIndex(p=>p.id===editingParcelaId);
+    if(idx>=0) per.parcelas[idx]={id:editingParcelaId,start,end,obs};
+    showToast('Parcela atualizada ✓');
+  } else {
+    const days=Math.round((new Date(end+'T12:00:00')-new Date(start+'T12:00:00'))/86400000)+1;
+    if(parcelaDays(per)+days>per.totalDays){
+      if(!confirm(`Atenção: isso vai ultrapassar o limite de ${per.totalDays} dias do período ${periodLabel(per)}. Continuar?`)) return;
+    }
+    per.parcelas.push({id:genId(),start,end,obs});
+    showToast('Parcela adicionada ✓');
+  }
+  await savePeriodFS(per);
+  closeParcelaModal(); renderFerias(); renderCalendar(); renderEmpList();
+};
+
+window.deleteParcela = async () => {
+  if(!isAdmin) return;
+  const per=periods.find(p=>p.id===editingPeriodId);
+  if(!per) return;
+  per.parcelas=per.parcelas.filter(p=>p.id!==editingParcelaId);
+  await savePeriodFS(per);
+  closeParcelaModal(); renderFerias(); renderCalendar(); renderEmpList();
+  showToast('Parcela removida.');
+};
+
+// Initial spinner while auth resolves — spinner is shown by default in HTML
+</script>
+</body>
+</html>
