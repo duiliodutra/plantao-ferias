@@ -121,6 +121,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .plantao-stat-count{font-weight:600;color:var(--text);font-family:'DM Mono',monospace;}
 .plantao-stat-total{margin-left:auto;font-size:12px;color:var(--text3);}
 .plantao-stat-total strong{color:var(--text);font-family:'DM Mono',monospace;}
+/* sabado tecnico tag */
+.sab-tec-chip{font-size:10px;padding:1px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;display:block;background:#e8f1fd;color:#0c447c;border:1px dashed #7ab0ea;}
+/* tabs inside plantao panel */
+.plantao-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.plantao-tab{flex:1;padding:10px 0;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text2);font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
+.plantao-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
+/* count badge on stat */
+.plantao-stat-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:10px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;}
 
 /* Calendar */
 .cal-wrap{flex:1;overflow-y:auto;}
@@ -393,6 +401,10 @@ body.readonly .pl-add{display:none!important;}
         <button class="nav-btn" onclick="navigate(1)"><i class="ti ti-chevron-right"></i></button>
         <button class="nav-btn" data-admin-only onclick="openCalModal(null,'plantao')"><i class="ti ti-plus"></i> Escalar</button>
       </div>
+      <div class="plantao-tabs">
+        <button class="plantao-tab active" onclick="switchPlantaoTab('plantoes')" id="ptab-plantoes">⚕ Plantões</button>
+        <button class="plantao-tab" onclick="switchPlantaoTab('sabados')" id="ptab-sabados">🔧 Sábados Técnicos</button>
+      </div>
       <div class="plantao-stats" id="plantao-stats"></div>
       <div class="panel-body" id="panel-plantao"></div>
     </div>
@@ -436,7 +448,7 @@ body.readonly .pl-add{display:none!important;}
     <div class="modal-title" id="cal-modal-title">Novo evento</div>
     <div class="field-wrap"><label class="field-label">FUNCIONÁRIO</label><select id="cm-emp"></select></div>
     <div class="field-wrap"><label class="field-label">TIPO</label>
-      <select id="cm-type"><option value="ferias">🏖 Férias</option><option value="plantao">⚕ Plantão</option></select>
+      <select id="cm-type"><option value="ferias">🏖 Férias</option><option value="plantao">⚕ Plantão</option><option value="sabado_tec">🔧 Sábado Técnico</option></select>
     </div>
     <div class="field-wrap" id="cm-period-wrap"><label class="field-label">PERÍODO AQUISITIVO</label><select id="cm-period"></select></div>
     <div class="field-wrap"><label class="field-label">DATAS</label>
@@ -554,6 +566,8 @@ const periodLabel = p => `${p.yearStart}/${p.yearStart+1}`;
 const parcelaDays = p => p.parcelas.reduce((acc,parc)=>acc+Math.round((new Date(parc.end+'T12:00:00')-new Date(parc.start+'T12:00:00'))/86400000)+1,0);
 const allFeriasEvents = () => periods.flatMap(per=>per.parcelas.map(parc=>({emp:per.emp,type:'ferias',start:parc.start,end:parc.end,periodId:per.id,parcelaId:parc.id})));
 const allEvents = () => [...calEvents,...allFeriasEvents()];
+const isSabTec = ev => ev.type==='sabado_tec';
+const isPlantao = ev => ev.type==='plantao';
 const eventsForDate = d => allEvents().filter(ev=>inRange(d,ev.start,ev.end));
 const genId = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
@@ -626,13 +640,15 @@ window.openDrawer=empName=>{
   const totalDays=empPeriods.reduce((a,p)=>a+p.totalDays,0);
   const usedDays=empPeriods.reduce((a,p)=>a+parcelaDays(p),0);
   const empPlantoes=calEvents.filter(e=>e.emp===empName&&e.type==='plantao').sort((a,b)=>b.start.localeCompare(a.start));
+  const empSabTec=calEvents.filter(e=>e.emp===empName&&e.type==='sabado_tec').sort((a,b)=>b.start.localeCompare(a.start));
 
-  document.getElementById('drawer-sub').textContent=`${empPeriods.length} período${empPeriods.length!==1?'s':''} · ${empPlantoes.length} plantão${empPlantoes.length!==1?'ões':''}`;
+  document.getElementById('drawer-sub').textContent=`${empPeriods.length} período${empPeriods.length!==1?'s':''} · ${empPlantoes.length} plantão${empPlantoes.length!==1?'ões':''} · ${empSabTec.length} sáb. técnico${empSabTec.length!==1?'s':''}`;
 
-  let html=`<div class="drawer-stats">
-    <div class="drawer-stat"><div class="drawer-stat-val" style="color:${emp.text};">${totalDays}</div><div class="drawer-stat-lbl">Dias de direito</div></div>
+  let html=`<div class="drawer-stats" style="grid-template-columns:repeat(4,1fr);">
+    <div class="drawer-stat"><div class="drawer-stat-val" style="color:${emp.text};">${totalDays}</div><div class="drawer-stat-lbl">Dias direito</div></div>
     <div class="drawer-stat"><div class="drawer-stat-val" style="color:#c0533a;">${usedDays}</div><div class="drawer-stat-lbl">Dias usados</div></div>
     <div class="drawer-stat"><div class="drawer-stat-val" style="color:#2e5c0e;">${totalDays-usedDays}</div><div class="drawer-stat-lbl">Restantes</div></div>
+    <div class="drawer-stat"><div class="drawer-stat-val" style="color:#2d5be3;">${empPlantoes.length}</div><div class="drawer-stat-lbl">Plantões</div></div>
   </div>`;
 
   if(empPeriods.length){
@@ -679,6 +695,17 @@ window.openDrawer=empName=>{
     });
   } else {
     html+=`<div class="drawer-section-title">HISTÓRICO DE PLANTÕES</div><div style="font-size:12px;color:var(--text3);padding:6px 0;">Nenhum plantão registrado.</div>`;
+  }
+
+  // Sábados técnicos no drawer
+  if(empSabTec.length){
+    html+=`<div class="drawer-section-title">SÁBADOS TÉCNICOS (${empSabTec.length})</div>`;
+    empSabTec.forEach(ev=>{
+      html+=`<div class="drawer-plantao-row">
+        <div class="drawer-plantao-date">${fmtDateLong(ev.start)}</div>
+        <span class="drawer-plantao-type" style="background:#e8f1fd;color:#0c447c;">Sáb. Técnico</span>
+      </div>`;
+    });
   }
 
   document.getElementById('drawer-body').innerHTML=html;
@@ -750,8 +777,11 @@ function renderCalendar(){
     if(holiday) inner+=`<div class="holiday-tag">${holiday}</div>`;
     dayEvs.slice(0,3).forEach(ev=>{
       const emp=getEmp(ev.emp);
-      const label=ev.type==='plantao'?`⚕ ${ev.emp}`:ev.emp;
-      if(emp) inner+=`<span class="event-chip" style="background:${emp.bg};color:${emp.text};">${label}</span>`;
+      const label=ev.type==='plantao'?`⚕ ${ev.emp}`:ev.type==='sabado_tec'?`🔧 ${ev.emp}`:ev.emp;
+      if(emp){
+        if(ev.type==='sabado_tec') inner+=`<span class="sab-tec-chip">${label}</span>`;
+        else inner+=`<span class="event-chip" style="background:${emp.bg};color:${emp.text};">${label}</span>`;
+      }
     });
     if(dayEvs.length>3) inner+=`<div style="font-size:10px;color:var(--text3);">+${dayEvs.length-3} mais</div>`;
     if(isAdmin) inner+=`<button class="cal-add" onclick="openCalModal('${dateS}',null,event)" aria-label="Adicionar"><i class="ti ti-plus"></i></button>`;
@@ -764,7 +794,7 @@ function renderCalendar(){
 window.handleDayClick=dateS=>{
   if(!isAdmin) return;
   const evs=eventsForDate(dateS);
-  if(evs.length===1&&evs[0].type==='plantao') openEditCalModal(evs[0].id);
+  if(evs.length===1&&(evs[0].type==='plantao'||evs[0].type==='sabado_tec')) openEditCalModal(evs[0].id);
   else openCalModal(dateS);
 };
 
@@ -864,26 +894,67 @@ window.toggleEmpBlock=id=>{
 };
 
 // ── Plantão ──
+let currentPlantaoTab='plantoes';
+
+window.switchPlantaoTab=tab=>{
+  currentPlantaoTab=tab;
+  document.getElementById('ptab-plantoes').classList.toggle('active',tab==='plantoes');
+  document.getElementById('ptab-sabados').classList.toggle('active',tab==='sabados');
+  renderPlantao();
+};
+
 function renderPlantao(){
   const y=currentDate.getFullYear(),m=currentDate.getMonth();
   const ms=ds(y,m+1,1),me=ds(y,m+1,new Date(y,m+1,0).getDate());
-  const monthPlantoes=calEvents.filter(e=>e.type==='plantao'&&e.start>=ms&&e.end<=me);
+  const showSabTec=currentPlantaoTab==='sabados';
 
-  // Stats por funcionário
+  // ── Stats: apenas plantões reais ──
+  const monthPlantoes=calEvents.filter(e=>e.type==='plantao'&&e.start>=ms&&e.end<=me);
+  const monthSabTec=calEvents.filter(e=>e.type==='sabado_tec'&&e.start>=ms&&e.end<=me);
+
   const countByEmp={};
   monthPlantoes.forEach(e=>{countByEmp[e.emp]=(countByEmp[e.emp]||0)+1;});
-  let statsHtml='';
-  Object.entries(countByEmp).sort((a,b)=>b[1]-a[1]).forEach(([name,ct])=>{
-    const emp=getEmp(name);
-    statsHtml+=`<div class="plantao-stat-item">
-      <div class="plantao-stat-dot" style="background:${emp?.mid};"></div>
-      <span class="plantao-stat-name">${name}</span>
-      <span class="plantao-stat-count">${ct}</span>
-    </div>`;
-  });
-  statsHtml+=`<div class="plantao-stat-total">Total: <strong>${monthPlantoes.length}</strong> plantão${monthPlantoes.length!==1?'ões':''}</div>`;
-  document.getElementById('plantao-stats').innerHTML=statsHtml||'<span style="font-size:12px;color:var(--text3);">Nenhum plantão neste mês.</span>';
 
+  // Build stats html — always shows plantao counts
+  let statsHtml='';
+  if(monthPlantoes.length===0&&!showSabTec){
+    statsHtml='<span style="font-size:12px;color:var(--text3);">Nenhum plantão neste mês.</span>';
+  } else {
+    Object.entries(countByEmp).sort((a,b)=>b[1]-a[1]).forEach(([name,ct])=>{
+      const emp=getEmp(name);
+      const accumulated=calEvents.filter(e=>e.emp===name&&e.type==='plantao'&&e.start<=me).length;
+      statsHtml+=`<div class="plantao-stat-item" title="${accumulated} plantões acumulados no ano">
+        <div class="plantao-stat-dot" style="background:${emp?.mid};"></div>
+        <span class="plantao-stat-name">${name}</span>
+        <span class="plantao-stat-badge" style="background:${emp?.bg};color:${emp?.text};">${ct}</span>
+      </div>`;
+    });
+    if(showSabTec){
+      // also show sabado tec counts
+      const sabCount={};
+      monthSabTec.forEach(e=>{sabCount[e.emp]=(sabCount[e.emp]||0)+1;});
+      if(Object.keys(sabCount).length){
+        statsHtml+='<span style="font-size:11px;color:var(--text3);margin:0 4px;">|</span>';
+        Object.entries(sabCount).sort((a,b)=>b[1]-a[1]).forEach(([name,ct])=>{
+          const emp=getEmp(name);
+          statsHtml+=`<div class="plantao-stat-item">
+            <span style="font-size:11px;">🔧</span>
+            <span class="plantao-stat-name">${name}</span>
+            <span class="plantao-stat-badge" style="background:#e8f1fd;color:#0c447c;">${ct}</span>
+          </div>`;
+        });
+      }
+    }
+    statsHtml+=`<div class="plantao-stat-total">
+      ${showSabTec
+        ? `Sáb. técnicos: <strong>${monthSabTec.length}</strong>`
+        : `Plantões: <strong>${monthPlantoes.length}</strong>`}
+    </div>`;
+  }
+  document.getElementById('plantao-stats').innerHTML=statsHtml;
+
+  // ── List ──
+  const eventType=showSabTec?'sabado_tec':'plantao';
   const dim=new Date(y,m+1,0).getDate();
   let html='';
   for(let d=1;d<=dim;d++){
@@ -891,22 +962,31 @@ function renderPlantao(){
     const dow=date.getDay();
     const dateS=ds(y,m+1,d);
     const holiday=HOLIDAYS[dateS];
-    if(dow!==0&&dow!==6&&!holiday) continue;
+    // Plantões: sab+dom+feriado. Sábado Técnico: apenas sábados
+    if(showSabTec){if(dow!==6) continue;}
+    else{if(dow!==0&&dow!==6&&!holiday) continue;}
+
     let type='',typeBg='',typeColor='';
-    if(holiday){type=holiday;typeBg='#fff8e0';typeColor='#8a6c10';}
-    else if(dow===6){type='Sábado';typeBg='#fdf0ec';typeColor='#7a3520';}
+    if(holiday&&!showSabTec){type=holiday;typeBg='#fff8e0';typeColor='#8a6c10';}
+    else if(dow===6){type=showSabTec?'Sábado Técnico':'Sábado';typeBg=showSabTec?'#e8f1fd':'#fdf0ec';typeColor=showSabTec?'#0c447c':'#7a3520';}
     else{type='Domingo';typeBg='#fcedf4';typeColor='#722440';}
-    const dayPl=calEvents.filter(e=>e.type==='plantao'&&inRange(dateS,e.start,e.end));
-    const chips=dayPl.map(e=>{const emp=getEmp(e.emp);return`<span class="pl-chip" style="background:${emp?.bg};color:${emp?.text};" ${isAdmin?`onclick="openEditCalModal('${e.id}',event)"`:''}>${e.emp}</span>`;}).join('');
+
+    const dayEvs=calEvents.filter(e=>e.type===eventType&&inRange(dateS,e.start,e.end));
+    const chips=dayEvs.map(e=>{
+      const emp=getEmp(e.emp);
+      const chipStyle=showSabTec?'background:#e8f1fd;color:#0c447c;border:1px dashed #7ab0ea;':`background:${emp?.bg};color:${emp?.text};`;
+      return `<span class="pl-chip" style="${chipStyle}" ${isAdmin?`onclick="openEditCalModal('${e.id}',event)"`:''}>${e.emp}</span>`;
+    }).join('');
+
     const fmtD=date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',weekday:'short'});
     html+=`<div class="plantao-row">
       <div class="pl-date">${fmtD}</div>
       <span class="pl-type" style="background:${typeBg};color:${typeColor};">${type}</span>
       <div class="pl-chips">${chips||'<span style="font-size:11px;color:var(--text3);">Sem escala</span>'}</div>
-      ${isAdmin?`<button class="pl-add" onclick="openCalModal('${dateS}','plantao',event)"><i class="ti ti-plus"></i> Escalar</button>`:''}
+      ${isAdmin?`<button class="pl-add" onclick="openCalModal('${dateS}','${eventType}',event)"><i class="ti ti-plus"></i> ${showSabTec?'Escalar':'Escalar'}</button>`:''}
     </div>`;
   }
-  document.getElementById('panel-plantao').innerHTML=html||'<div class="empty-msg">Sem fins de semana neste mês.</div>';
+  document.getElementById('panel-plantao').innerHTML=html||`<div class="empty-msg">${showSabTec?'Nenhum sábado técnico neste mês.':'Sem fins de semana neste mês.'}</div>`;
 }
 
 // ── Modal: Cal ──
@@ -935,7 +1015,9 @@ function updateCalModalPeriods(){
     const ep=periods.filter(p=>p.emp===emp);
     if(ep.length){sel.innerHTML=ep.map(p=>`<option value="${p.id}">${periodLabel(p)} (${p.totalDays-parcelaDays(p)}d restantes)</option>`).join('');wrap.style.display='block';}
     else wrap.style.display='none';
-  } else wrap.style.display='none';
+  } else {
+    wrap.style.display='none';
+  }
 }
 
 window.openEditCalModal=(id,ev)=>{
