@@ -123,10 +123,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .plantao-stat-total strong{color:var(--text);font-family:'DM Mono',monospace;}
 /* sabado tecnico tag */
 .serv-normal-chip{font-size:10px;padding:1px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;display:block;background:#e8f1fd;color:#0c447c;border:1px dashed #7ab0ea;}
-/* tabs inside plantao panel */
-.plantao-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
-.plantao-tab{flex:1;padding:10px 0;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text2);font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
-.plantao-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500;}
+
 /* count badge on stat */
 .plantao-stat-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:10px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;}
 
@@ -399,11 +396,7 @@ body.readonly .pl-add{display:none!important;}
         <button class="nav-btn" onclick="navigate(-1)"><i class="ti ti-chevron-left"></i></button>
         <span class="toolbar-title" id="plantao-month-label"></span>
         <button class="nav-btn" onclick="navigate(1)"><i class="ti ti-chevron-right"></i></button>
-        <button class="nav-btn" data-admin-only onclick="openCalModal(null,'plantao')"><i class="ti ti-plus"></i> Escalar</button>
-      </div>
-      <div class="plantao-tabs">
-        <button class="plantao-tab active" onclick="switchPlantaoTab('plantoes')" id="ptab-plantoes">⚕ Plantões</button>
-        <button class="plantao-tab" onclick="switchPlantaoTab('serv_normal_tab')" id="ptab-serv_normal_tab">📋 Serviço Normal</button>
+        <button class="nav-btn" data-admin-only onclick="openCalModal(null,'plantao')"><i class="ti ti-plus"></i> Escalar plantão</button>
       </div>
       <div class="plantao-stats" id="plantao-stats"></div>
       <div class="panel-body" id="panel-plantao"></div>
@@ -448,7 +441,7 @@ body.readonly .pl-add{display:none!important;}
     <div class="modal-title" id="cal-modal-title">Novo evento</div>
     <div class="field-wrap"><label class="field-label">FUNCIONÁRIO</label><select id="cm-emp"></select></div>
     <div class="field-wrap"><label class="field-label">TIPO</label>
-      <select id="cm-type"><option value="ferias">🏖 Férias</option><option value="plantao">⚕ Plantão</option><option value="serv_normal">📋 Serviço Normal</option></select>
+      <select id="cm-type"><option value="ferias">🏖 Férias</option><option value="plantao">⚕ Plantão</option><option value="serv_normal">📋 Serviço Normal (sábado)</option></select>
     </div>
     <div class="field-wrap" id="cm-period-wrap"><label class="field-label">PERÍODO AQUISITIVO</label><select id="cm-period"></select></div>
     <div class="field-wrap"><label class="field-label">DATAS</label>
@@ -896,12 +889,6 @@ window.toggleEmpBlock=id=>{
 // ── Plantão ──
 let currentPlantaoTab='plantoes';
 
-window.switchPlantaoTab=tab=>{
-  currentPlantaoTab=tab;
-  document.getElementById('ptab-plantoes').classList.toggle('active',tab==='plantoes');
-  document.getElementById('ptab-serv_normal_tab').classList.toggle('active',tab==='serv_normal_tab');
-  renderPlantao();
-};
 
 function renderPlantao(){
   const y=currentDate.getFullYear(),m=currentDate.getMonth();
@@ -964,7 +951,7 @@ function renderPlantao(){
     const holiday=HOLIDAYS[dateS];
     // Plantões: sab+dom+feriado. Serviço Normal: apenas sábados
     if(showSabTec){if(dow===0) continue;} // Serviço Normal: seg-sáb, exceto domingo
-    else{if(dow!==0&&dow!==6&&!holiday) continue;}
+    if(dow!==0&&!holiday) continue; // apenas domingos e feriados
 
     let type='',typeBg='',typeColor='';
     if(holiday&&!showSabTec){type=holiday;typeBg='#fff8e0';typeColor='#8a6c10';}
