@@ -96,6 +96,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .nav-item i{font-size:16px;}
 .emp-section{padding:14px 12px;border-top:1px solid var(--border);flex:1;overflow-y:auto;}
 
+/* ── Cal sub-tabs (Férias / Escala) ── */
+.cal-subtabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;}
+.cal-subtab{flex:1;padding:10px 0;border:none;background:none;cursor:pointer;font-size:13px;
+  color:var(--text2);font-family:'DM Sans',sans-serif;border-bottom:3px solid transparent;
+  transition:color 0.15s,border-color 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.cal-subtab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.cal-subtab i{font-size:16px;}
+
 /* Read-only banner */
 .readonly-banner{display:none;align-items:center;gap:8px;padding:8px 20px;background:#fffbf0;border-bottom:1px solid #f0e4b0;font-size:12px;color:#8a6c10;}
 .readonly-banner.show{display:flex;}
@@ -323,8 +331,9 @@ body.readonly .pl-add{display:none!important;}
         </div>
         <div class="desktop-nav">
           <div class="nav-label">Visualização</div>
-          <button class="nav-item active" onclick="switchTab('calendario')" id="nav-calendario"><i class="ti ti-calendar"></i> Calendário</button>
-          <button class="nav-item" onclick="switchTab('ferias')" id="nav-ferias"><i class="ti ti-beach"></i> Férias</button>
+          <button class="nav-item active" onclick="switchTab('calendario');switchCalTab('ferias_cal')" id="nav-calendario"><i class="ti ti-beach"></i> Cal. Férias</button>
+          <button class="nav-item" onclick="switchTab('calendario');switchCalTab('escala')" id="nav-escala"><i class="ti ti-calendar-event"></i> Cal. Escala</button>
+          <button class="nav-item" onclick="switchTab('ferias')" id="nav-ferias"><i class="ti ti-list"></i> Controle Férias</button>
           <button class="nav-item" onclick="switchTab('plantao')" id="nav-plantao"><i class="ti ti-clock-hour-4"></i> Plantões</button>
         </div>
       </div>
@@ -362,19 +371,52 @@ body.readonly .pl-add{display:none!important;}
 
     <!-- Calendário -->
     <div class="main" id="main-calendario">
-      <div class="toolbar">
+      <!-- Sub-tabs: Férias / Escala -->
+      <div class="cal-subtabs">
+        <button class="cal-subtab active" onclick="switchCalTab('ferias_cal')" id="caltab-ferias_cal">
+          <i class="ti ti-beach"></i> Férias
+        </button>
+        <button class="cal-subtab" onclick="switchCalTab('escala')" id="caltab-escala">
+          <i class="ti ti-calendar-event"></i> Escala
+        </button>
+      </div>
+
+      <!-- Navegação de mês (compartilhada) -->
+      <div class="toolbar" style="padding:8px 20px;">
         <button class="nav-btn" onclick="navigate(-1)"><i class="ti ti-chevron-left"></i></button>
         <span class="toolbar-title" id="cal-month-label"></span>
         <button class="nav-btn" onclick="navigate(1)"><i class="ti ti-chevron-right"></i></button>
+        <button class="nav-btn" data-admin-only id="cal-add-btn" onclick="openCalModal(null)" style="margin-left:4px;">
+          <i class="ti ti-plus"></i> <span id="cal-add-label">Adicionar</span>
+        </button>
       </div>
+
+      <!-- Stats bar (só no calendário de férias) -->
       <div class="stats-bar" id="stats-bar"></div>
-      <div class="cal-wrap">
-        <div class="weekday-row">
-          <div class="wday">SEG</div><div class="wday">TER</div><div class="wday">QUA</div>
-          <div class="wday">QUI</div><div class="wday">SEX</div>
-          <div class="wday weekend">SÁB</div><div class="wday weekend">DOM</div>
+
+      <!-- Calendário de FÉRIAS -->
+      <div id="cal-ferias-wrap" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="cal-wrap">
+          <div class="weekday-row">
+            <div class="wday">SEG</div><div class="wday">TER</div><div class="wday">QUA</div>
+            <div class="wday">QUI</div><div class="wday">SEX</div>
+            <div class="wday weekend">SÁB</div><div class="wday weekend">DOM</div>
+          </div>
+          <div class="cal-grid" id="cal-grid-ferias"></div>
         </div>
-        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <!-- Calendário de ESCALA -->
+      <div id="cal-escala-wrap" style="flex:1;display:flex;flex-direction:column;overflow:hidden;display:none;">
+        <div class="plantao-stats" id="escala-stats"></div>
+        <div class="cal-wrap">
+          <div class="weekday-row">
+            <div class="wday">SEG</div><div class="wday">TER</div><div class="wday">QUA</div>
+            <div class="wday">QUI</div><div class="wday">SEX</div>
+            <div class="wday weekend">SÁB</div><div class="wday weekend">DOM</div>
+          </div>
+          <div class="cal-grid" id="cal-grid-escala"></div>
+        </div>
       </div>
     </div>
 
@@ -406,11 +448,11 @@ body.readonly .pl-add{display:none!important;}
 
   <!-- Bottom nav: mobile only -->
   <nav class="bottom-nav">
-    <button class="bottom-nav-item active" onclick="switchTab('calendario')" id="bnav-calendario">
-      <i class="ti ti-calendar"></i><span>Calendário</span>
-    </button>
-    <button class="bottom-nav-item" onclick="switchTab('ferias')" id="bnav-ferias">
+    <button class="bottom-nav-item active" onclick="switchTab('calendario');switchCalTab('ferias_cal')" id="bnav-calendario">
       <i class="ti ti-beach"></i><span>Férias</span>
+    </button>
+    <button class="bottom-nav-item" onclick="switchTab('calendario');switchCalTab('escala')" id="bnav-escala">
+      <i class="ti ti-calendar-event"></i><span>Escala</span>
     </button>
     <button class="bottom-nav-item" onclick="switchTab('plantao')" id="bnav-plantao">
       <i class="ti ti-clock-hour-4"></i><span>Plantões</span>
@@ -739,10 +781,8 @@ function renderStats(){
 }
 
 // ── Calendar ──
-function renderCalendar(){
+function buildCalGrid(gridId, eventFilter, labelFn, addFn){
   const y=currentDate.getFullYear(),m=currentDate.getMonth();
-  document.getElementById('cal-month-label').textContent=`${MONTHS[m]} ${y}`;
-  document.getElementById('plantao-month-label').textContent=`${MONTHS[m]} ${y}`;
   const firstDow=new Date(y,m,1).getDay();
   const offset=firstDow===0?6:firstDow-1;
   const dim=new Date(y,m+1,0).getDate();
@@ -760,7 +800,7 @@ function renderCalendar(){
     const isWeekend=!other&&(dow===5||dow===6);
     const holiday=!other&&HOLIDAYS[dateS];
     const isToday=dateS===todayStr;
-    const dayEvs=eventsForDate(dateS);
+    const dayEvs=eventFilter(dateS);
     let cls='cal-day';
     if(other) cls+=' other-month';
     if(isWeekend) cls+=' weekend-day';
@@ -768,39 +808,109 @@ function renderCalendar(){
     if(isToday) cls+=' today';
     let inner=`<div class="day-num">${day}</div>`;
     if(holiday) inner+=`<div class="holiday-tag">${holiday}</div>`;
-    dayEvs.slice(0,3).forEach(ev=>{
-      const emp=getEmp(ev.emp);
-      const label=ev.type==='plantao'?`⚕ ${ev.emp}`:ev.type==='serv_normal'?`📋 ${ev.emp}`:ev.emp;
-      if(emp){
-        if(ev.type==='serv_normal') inner+=`<span class="serv-normal-chip">${label}</span>`;
-        else inner+=`<span class="event-chip" style="background:${emp.bg};color:${emp.text};">${label}</span>`;
-      }
-    });
+    dayEvs.slice(0,3).forEach(ev=>{ inner+=labelFn(ev); });
     if(dayEvs.length>3) inner+=`<div style="font-size:10px;color:var(--text3);">+${dayEvs.length-3} mais</div>`;
-    if(isAdmin) inner+=`<button class="cal-add" onclick="openCalModal('${dateS}',null,event)" aria-label="Adicionar"><i class="ti ti-plus"></i></button>`;
-    html+=`<div class="${cls}" onclick="handleDayClick('${dateS}')">${inner}</div>`;
+    if(isAdmin) inner+=addFn(dateS);
+    html+=`<div class="${cls}" onclick="handleDayClick('${dateS}','${gridId}')">${inner}</div>`;
   }
-  document.getElementById('cal-grid').innerHTML=html;
+  document.getElementById(gridId).innerHTML=html;
+}
+
+function renderCalendarioFerias(){
+  buildCalGrid(
+    'cal-grid-ferias',
+    dateS => allFeriasEvents().filter(ev=>inRange(dateS,ev.start,ev.end)),
+    ev => {
+      const emp=getEmp(ev.emp);
+      if(!emp) return '';
+      return `<span class="event-chip" style="background:${emp.bg};color:${emp.text};">${ev.emp}</span>`;
+    },
+    dateS => `<button class="cal-add" onclick="openCalModal('${dateS}','ferias',event)" aria-label="Férias"><i class="ti ti-plus"></i></button>`
+  );
   renderStats(); renderEmpList();
 }
 
-window.handleDayClick=dateS=>{
+function renderCalendarioEscala(){
+  buildCalGrid(
+    'cal-grid-escala',
+    dateS => calEvents.filter(ev=>inRange(dateS,ev.start,ev.end)&&(ev.type==='plantao'||ev.type==='serv_normal')),
+    ev => {
+      const emp=getEmp(ev.emp);
+      if(!emp) return '';
+      if(ev.type==='serv_normal')
+        return `<span class="serv-normal-chip">📋 ${ev.emp}</span>`;
+      return `<span class="event-chip" style="background:${emp.bg};color:${emp.text};">⚕ ${ev.emp}</span>`;
+    },
+    dateS => {
+      const d=new Date(dateS+'T12:00:00');
+      const dow=d.getDay();
+      const holiday=!!HOLIDAYS[dateS];
+      const type=(dow===0||holiday)?'plantao':'serv_normal';
+      return `<button class="cal-add" onclick="openCalModal('${dateS}','${type}',event)" aria-label="Escalar"><i class="ti ti-plus"></i></button>`;
+    }
+  );
+  renderEscalaStats();
+}
+
+function renderEscalaStats(){
+  const y=currentDate.getFullYear(),m=currentDate.getMonth();
+  const ms=ds(y,m+1,1),me=ds(y,m+1,new Date(y,m+1,0).getDate());
+  const monthPl=calEvents.filter(e=>e.type==='plantao'&&e.start>=ms&&e.end<=me);
+  const monthSn=calEvents.filter(e=>e.type==='serv_normal'&&e.start>=ms&&e.end<=me);
+  const countByEmp={};
+  monthPl.forEach(e=>{countByEmp[e.emp]=(countByEmp[e.emp]||0)+1;});
+  let html='';
+  Object.entries(countByEmp).sort((a,b)=>b[1]-a[1]).forEach(([name,ct])=>{
+    const emp=getEmp(name);
+    html+=`<div class="plantao-stat-item">
+      <div class="plantao-stat-dot" style="background:${emp?.mid};"></div>
+      <span class="plantao-stat-name">${name}</span>
+      <span class="plantao-stat-badge" style="background:${emp?.bg};color:${emp?.text};">${ct}</span>
+    </div>`;
+  });
+  if(html) html+=`<div class="plantao-stat-total">Plantões: <strong>${monthPl.length}</strong>${monthSn.length?` · Serv. Normal: <strong>${monthSn.length}</strong>`:''}</div>`;
+  const el=document.getElementById('escala-stats');
+  if(el) el.innerHTML=html||'<span style="font-size:12px;color:var(--text3);">Sem escala este mês.</span>';
+}
+
+function renderCalendar(){
+  const y=currentDate.getFullYear(),m=currentDate.getMonth();
+  document.getElementById('cal-month-label').textContent=`${MONTHS[m]} ${y}`;
+  document.getElementById('plantao-month-label').textContent=`${MONTHS[m]} ${y}`;
+  if(currentCalTab==='ferias_cal') renderCalendarioFerias();
+  else renderCalendarioEscala();
+}
+
+window.handleDayClick=(dateS,gridId)=>{
   if(!isAdmin) return;
-  const evs=eventsForDate(dateS).filter(e=>e.type==='plantao'||e.type==='serv_normal');
-  if(evs.length===1) openEditCalModal(evs[0].id);
-  else {
-    // Auto-detect type by day of week
-    const d=new Date(dateS+'T12:00:00');
-    const dow=d.getDay();
-    const holiday=!!HOLIDAYS[dateS];
-    const defaultType = (dow===0||holiday) ? 'plantao' : (dow===6 ? 'serv_normal' : 'serv_normal');
-    openCalModal(dateS, defaultType);
+  const isFeriasGrid = gridId==='cal-grid-ferias' || currentCalTab==='ferias_cal';
+  if(isFeriasGrid){
+    // Click on ferias calendar: open modal for ferias
+    const ferEvs=allFeriasEvents().filter(ev=>inRange(dateS,ev.start,ev.end));
+    if(ferEvs.length===1){
+      // open parcela edit
+      openParcelaModal(ferEvs[0].periodId, ferEvs[0].parcelaId, null);
+    } else {
+      openCalModal(dateS,'ferias');
+    }
+  } else {
+    // Click on escala calendar
+    const evs=calEvents.filter(e=>(e.type==='plantao'||e.type==='serv_normal')&&inRange(dateS,e.start,e.end));
+    if(evs.length===1) openEditCalModal(evs[0].id);
+    else{
+      const d=new Date(dateS+'T12:00:00');
+      const dow=d.getDay();
+      const holiday=!!HOLIDAYS[dateS];
+      const defaultType=(dow===0||holiday)?'plantao':'serv_normal';
+      openCalModal(dateS,defaultType);
+    }
   }
 };
 
 window.navigate=dir=>{
   currentDate=new Date(currentDate.getFullYear(),currentDate.getMonth()+dir,1);
   renderCalendar(); renderPlantao();
+  if(currentCalTab==='escala') renderEscalaStats();
 };
 
 window.openMenuDrawer=()=>{
@@ -811,15 +921,52 @@ window.closeMenuDrawer=()=>{
   document.getElementById('menu-drawer').classList.remove('open');
   document.getElementById('menu-drawer-overlay').classList.remove('open');
 };
+let currentCalTab = 'ferias_cal';
+
+window.switchCalTab = calTab => {
+  currentCalTab = calTab;
+  const isFer = calTab === 'ferias_cal';
+  document.getElementById('cal-ferias-wrap').style.display = isFer ? 'flex' : 'none';
+  document.getElementById('cal-escala-wrap').style.display = isFer ? 'none' : 'flex';
+  document.getElementById('caltab-ferias_cal').classList.toggle('active', isFer);
+  document.getElementById('caltab-escala').classList.toggle('active', !isFer);
+  document.getElementById('stats-bar').style.display = isFer ? 'grid' : 'none';
+  // Update add button label
+  const addLabel = document.getElementById('cal-add-label');
+  if(addLabel) addLabel.textContent = isFer ? 'Férias' : 'Escalar';
+  // Update desktop nav active state
+  const navFer = document.getElementById('nav-calendario');
+  const navEsc = document.getElementById('nav-escala');
+  if(navFer) navFer.classList.toggle('active', isFer);
+  if(navEsc) navEsc.classList.toggle('active', !isFer);
+  // Update bottom nav
+  const bFer = document.getElementById('bnav-calendario');
+  const bEsc = document.getElementById('bnav-escala');
+  if(bFer) bFer.classList.toggle('active', isFer);
+  if(bEsc) bEsc.classList.toggle('active', !isFer);
+  if(!isFer) renderEscalaStats();
+  if(isFer) renderCalendarioFerias();
+  else renderCalendarioEscala();
+};
+
 window.switchTab=tab=>{
   currentTab=tab;
   ['calendario','ferias','plantao'].forEach(t=>{
     document.getElementById(`main-${t}`).style.display=t===tab?'flex':'none';
-    const navEl=document.getElementById(`nav-${t}`);
-    if(navEl) navEl.classList.toggle('active',t===tab);
-    const bnavEl=document.getElementById(`bnav-${t}`);
-    if(bnavEl) bnavEl.classList.toggle('active',t===tab);
   });
+  // nav items
+  ['calendario','escala','ferias','plantao'].forEach(t=>{
+    const navEl=document.getElementById(`nav-${t}`);
+    if(navEl) navEl.classList.remove('active');
+  });
+  if(tab==='calendario'){
+    const activeNav = currentCalTab==='ferias_cal' ? 'nav-calendario' : 'nav-escala';
+    const el=document.getElementById(activeNav);
+    if(el) el.classList.add('active');
+  } else {
+    const navEl=document.getElementById(`nav-${tab}`);
+    if(navEl) navEl.classList.add('active');
+  }
   closeMenuDrawer();
   if(tab==='ferias') renderFerias();
   if(tab==='plantao') renderPlantao();
@@ -957,16 +1104,8 @@ window.openCalModal=(dateS,defaultType,ev)=>{
   if(!isAdmin){showToast('Sem permissão para editar.');return;}
   if(ev) ev.stopPropagation();
   editingCalId=null;
-  // Auto-detect type based on day if not passed
+  // Use passed type or detect from context
   let autoType=defaultType||'ferias';
-  if(dateS&&!defaultType){
-    const d=new Date(dateS+'T12:00:00');
-    const dow=d.getDay();
-    const holiday=!!HOLIDAYS[dateS];
-    if(dow===0||holiday) autoType='plantao';
-    else if(dow===6) autoType='serv_normal';
-    else autoType='ferias';
-  }
   document.getElementById('cal-modal-title').textContent=dateS?`Evento em ${fmtDate(dateS)}`:'Novo evento';
   document.getElementById('cm-emp').innerHTML=EMPLOYEES.map(e=>`<option>${e.name}</option>`).join('');
   document.getElementById('cm-type').value=autoType;
